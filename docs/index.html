@@ -39,6 +39,23 @@
         white-space: nowrap;
       }
       th { background: #f5f5f5; }
+      th.sortable {
+        cursor: pointer;
+        user-select: none;
+      }
+      th.sortable::after {
+        content: " ↕";
+        color: #6b7280;
+        font-size: 0.85em;
+      }
+      th.sortable.sorted-asc::after {
+        content: " ↑";
+        color: #111827;
+      }
+      th.sortable.sorted-desc::after {
+        content: " ↓";
+        color: #111827;
+      }
       .faction-cell {
         font-weight: 600;
       }
@@ -888,5 +905,110 @@
       
     </div>
     </div>
+    <script>
+      function parseSortValue(rawText) {
+        const text = (rawText || "").trim();
+        if (!text) {
+          return { type: "text", value: "" };
+        }
+
+        const fractionMatch = text.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+        if (fractionMatch) {
+          const numerator = Number(fractionMatch[1]);
+          const denominator = Number(fractionMatch[2]);
+          if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0) {
+            return { type: "number", value: numerator / denominator };
+          }
+        }
+
+        const numericCandidate = text.replace(/[,%]/g, "");
+        const numericValue = Number(numericCandidate);
+        if (Number.isFinite(numericValue) && numericCandidate !== "") {
+          return { type: "number", value: numericValue };
+        }
+
+        return { type: "text", value: text.toLowerCase() };
+      }
+
+      function compareSortValues(left, right) {
+        if (left.type === "number" && right.type === "number") {
+          return left.value - right.value;
+        }
+        if (left.type === "text" && right.type === "text") {
+          return left.value.localeCompare(right.value, undefined, { numeric: true });
+        }
+        return left.type === "number" ? -1 : 1;
+      }
+
+      function sortTableByColumn(table, columnIndex, header) {
+        const tbody = table.querySelector("tbody");
+        if (!tbody) {
+          return;
+        }
+
+        const headerCount = table.querySelectorAll("thead th").length;
+        const allRows = Array.from(tbody.querySelectorAll("tr"));
+        const sortableRows = allRows.filter((row) => row.children.length === headerCount);
+        const lockedRows = allRows.filter((row) => row.children.length !== headerCount);
+        if (sortableRows.length === 0) {
+          return;
+        }
+
+        const newDirection = header.dataset.sortDir === "asc" ? "desc" : "asc";
+        table.querySelectorAll("thead th.sortable").forEach((th) => {
+          th.dataset.sortDir = "none";
+          th.classList.remove("sorted-asc", "sorted-desc");
+          th.setAttribute("aria-sort", "none");
+        });
+        header.dataset.sortDir = newDirection;
+        header.classList.add(newDirection === "asc" ? "sorted-asc" : "sorted-desc");
+        header.classList.remove(newDirection === "asc" ? "sorted-desc" : "sorted-asc");
+        header.setAttribute("aria-sort", newDirection === "asc" ? "ascending" : "descending");
+
+        const decorated = sortableRows.map((row, originalIndex) => {
+          const cellText = row.children[columnIndex] ? row.children[columnIndex].textContent : "";
+          return {
+            row,
+            originalIndex,
+            sortValue: parseSortValue(cellText),
+          };
+        });
+
+        decorated.sort((left, right) => {
+          const base = compareSortValues(left.sortValue, right.sortValue);
+          if (base !== 0) {
+            return newDirection === "asc" ? base : -base;
+          }
+          return left.originalIndex - right.originalIndex;
+        });
+
+        for (const item of decorated) {
+          tbody.appendChild(item.row);
+        }
+        for (const row of lockedRows) {
+          tbody.appendChild(row);
+        }
+      }
+
+      document.querySelectorAll("table").forEach((table) => {
+        const headers = Array.from(table.querySelectorAll("thead th"));
+        if (headers.length === 0) {
+          return;
+        }
+        headers.forEach((header, columnIndex) => {
+          header.classList.add("sortable");
+          header.dataset.sortDir = "none";
+          header.setAttribute("aria-sort", "none");
+          header.tabIndex = 0;
+          header.addEventListener("click", () => sortTableByColumn(table, columnIndex, header));
+          header.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              sortTableByColumn(table, columnIndex, header);
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>
