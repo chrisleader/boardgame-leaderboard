@@ -22,7 +22,8 @@ def build_static_homepage() -> Path:
         per_game_groups = leaderboard_app.group_per_game_rows(per_game)
         root_faction_share = leaderboard_app.root_faction_share_rows(conn)
         root_faction_win_rates = leaderboard_app.root_faction_win_rate_rows(conn)
-        root_player_factions = leaderboard_app.root_player_top_factions(conn)
+        root_player_faction_rows = leaderboard_app.root_player_faction_rows(conn)
+        root_player_faction_groups = leaderboard_app.group_root_player_faction_rows(root_player_faction_rows)
         root_faction_palette = leaderboard_app.root_faction_palette(conn)
 
     with leaderboard_app.app.app_context():
@@ -33,7 +34,7 @@ def build_static_homepage() -> Path:
             per_game_groups=per_game_groups,
             root_faction_share=root_faction_share,
             root_faction_win_rates=root_faction_win_rates,
-            root_player_factions=root_player_factions,
+            root_player_faction_groups=root_player_faction_groups,
             root_faction_palette=root_faction_palette,
         )
 

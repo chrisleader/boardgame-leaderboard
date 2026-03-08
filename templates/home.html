@@ -172,34 +172,41 @@
       </table>
       </div>
 
-      <h3>Top faction for each player</h3>
+      <h3>Faction stats by player</h3>
+      {% for group in root_player_faction_groups %}
+      <h3>{{ group['player_name'] }}</h3>
       <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Player</th>
-            <th>Top Faction</th>
+            <th>Faction</th>
             <th>Games</th>
             <th>Wins</th>
             <th>Win Rate</th>
           </tr>
         </thead>
         <tbody>
-          {% for row in root_player_factions %}
+          {% for row in group['rows'] %}
           {% set palette = root_faction_palette.get(row['faction_name']) %}
           <tr>
-            <td>{{ row['player_name'] }}</td>
             <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
             <td>{{ row['games_played'] }}</td>
             <td>{{ row['wins'] }}</td>
             <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
           </tr>
-          {% else %}
-          <tr><td colspan="5">No top-faction data yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
       </div>
+      {% else %}
+      <div class="table-wrap">
+      <table>
+        <tbody>
+          <tr><td>No player faction stats yet.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      {% endfor %}
     </div>
     </div>
   </body>

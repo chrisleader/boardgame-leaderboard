@@ -966,46 +966,34 @@ def root_faction_win_rate_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
-def root_player_top_factions(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+def root_player_faction_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     prepare_temp_views(conn)
     return conn.execute(
         """
-        WITH stats AS (
-            SELECT
-                p.id AS player_id,
-                p.name AS player_name,
-                f.name AS faction_name,
-                COUNT(*) AS games_played,
-                COALESCE(SUM(mw.is_winner), 0) AS wins,
-                COALESCE(SUM(mw.is_winner), 0) * 1.0 / COUNT(*) AS win_rate
-            FROM match_player_factions mpf
-            JOIN players p ON p.id = mpf.player_id
-            JOIN factions f ON f.id = mpf.faction_id AND f.game_name = 'root'
-            JOIN matches m ON m.id = mpf.match_id AND m.relevant = 1
-            JOIN games g ON g.id = m.game_id AND g.name = 'root'
-            LEFT JOIN match_winners mw ON mw.match_id = mpf.match_id AND mw.player_id = mpf.player_id
-            GROUP BY p.id, p.name, f.name
-        ),
-        ranked AS (
-            SELECT
-                *,
-                ROW_NUMBER() OVER (
-                    PARTITION BY player_id
-                    ORDER BY games_played DESC, win_rate DESC, wins DESC, faction_name ASC
-                ) AS row_rank
-            FROM stats
-        )
         SELECT
-            player_name,
-            faction_name,
-            games_played,
-            wins,
-            win_rate
-        FROM ranked
-        WHERE row_rank = 1
-        ORDER BY player_name ASC
+            p.name AS player_name,
+            f.name AS faction_name,
+            COUNT(*) AS games_played,
+            COALESCE(SUM(mw.is_winner), 0) AS wins,
+            COALESCE(SUM(mw.is_winner), 0) * 1.0 / COUNT(*) AS win_rate
+        FROM match_player_factions mpf
+        JOIN players p ON p.id = mpf.player_id
+        JOIN factions f ON f.id = mpf.faction_id AND f.game_name = 'root'
+        JOIN matches m ON m.id = mpf.match_id AND m.relevant = 1
+        JOIN games g ON g.id = m.game_id AND g.name = 'root'
+        LEFT JOIN match_winners mw ON mw.match_id = mpf.match_id AND mw.player_id = mpf.player_id
+        GROUP BY p.id, p.name, f.name
+        ORDER BY p.name ASC, games_played DESC, win_rate DESC, wins DESC, faction_name ASC
         """
     ).fetchall()
+
+
+def group_root_player_faction_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
+    grouped: dict[str, list[sqlite3.Row]] = {}
+    for row in rows:
+        player_name = str(row["player_name"])
+        grouped.setdefault(player_name, []).append(row)
+    return [{"player_name": player_name, "rows": player_rows} for player_name, player_rows in grouped.items()]
 
 
 def group_per_game_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
@@ -1026,7 +1014,8 @@ def home():
         per_game_groups = group_per_game_rows(per_game)
         root_faction_share = root_faction_share_rows(conn)
         root_faction_win_rates = root_faction_win_rate_rows(conn)
-        root_player_factions = root_player_top_factions(conn)
+        root_player_faction_rows_data = root_player_faction_rows(conn)
+        root_player_faction_groups = group_root_player_faction_rows(root_player_faction_rows_data)
         root_faction_palette_map = root_faction_palette(conn)
 
     return render_template(
@@ -1036,7 +1025,7 @@ def home():
         per_game_groups=per_game_groups,
         root_faction_share=root_faction_share,
         root_faction_win_rates=root_faction_win_rates,
-        root_player_factions=root_player_factions,
+        root_player_faction_groups=root_player_faction_groups,
         root_faction_palette=root_faction_palette_map,
     )
 
