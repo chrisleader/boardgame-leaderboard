@@ -19,7 +19,7 @@ def build_static_homepage() -> Path:
         leaderboard_app.backfill_root_factions(conn)
         leaderboard = leaderboard_app.leaderboard_rows(conn)
         per_game = leaderboard_app.per_game_win_rates(conn)
-        per_game_groups = leaderboard_app.group_per_game_rows(per_game)
+        per_game_map = leaderboard_app.per_game_rows_map(per_game)
         root_faction_share = leaderboard_app.root_faction_share_rows(conn)
         root_faction_win_rates = leaderboard_app.root_faction_win_rate_rows(conn)
         root_faction_matchups = leaderboard_app.root_faction_matchup_rows(conn)
@@ -35,7 +35,7 @@ def build_static_homepage() -> Path:
             "home.html",
             leaderboard=leaderboard,
             per_game=per_game,
-            per_game_groups=per_game_groups,
+            per_game_map=per_game_map,
             root_faction_share=root_faction_share,
             root_faction_win_rates=root_faction_win_rates,
             root_faction_matchup_factions=root_faction_matchup_factions,

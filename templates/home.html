@@ -21,6 +21,37 @@
       h2 { margin: 0 0 8px; font-size: clamp(1.15rem, 3.8vw, 1.55rem); }
       h3 { margin: 10px 0 8px; font-size: 1rem; }
       .section { margin-top: 20px; }
+      .view-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 14px;
+        padding-bottom: 2px;
+      }
+      .view-tab {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 7px 12px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .view-tab.active {
+        background: #111827;
+        border-color: #111827;
+        color: #fff;
+      }
+      .content-view {
+        display: none;
+      }
+      .content-view.active {
+        display: block;
+      }
       .table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -119,208 +150,272 @@
   <body>
     <div class="container">
     <h1>Board Game Leaderboard</h1>
+    {% set dune_rows = per_game_map.get('dune', []) %}
+    {% set everdell_rows = per_game_map.get('everdell', []) %}
+    {% set root_rows = per_game_map.get('root', []) %}
 
-    <div class="section">
-      <h2>Overall</h2>
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Games</th>
-            <th>Wins</th>
-            <th>Win Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in leaderboard %}
-          <tr>
-            <td>{{ row['name'] }}</td>
-            <td>{{ row['games_played'] }}</td>
-            <td>{{ row['wins'] }}</td>
-            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="4">No confirmed game results yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="view-tabs" role="tablist" aria-label="Leaderboard views">
+      <button type="button" class="view-tab active" data-view="overall" role="tab" aria-selected="true">Overall</button>
+      <button type="button" class="view-tab" data-view="dune" role="tab" aria-selected="false">Dune</button>
+      <button type="button" class="view-tab" data-view="everdell" role="tab" aria-selected="false">Everdell</button>
+      <button type="button" class="view-tab" data-view="root" role="tab" aria-selected="false">Root</button>
+    </div>
+
+    <div class="content-view active" data-view="overall" role="tabpanel">
+      <div class="section">
+        <h2>Overall</h2>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in leaderboard %}
+            <tr>
+              <td>{{ row['name'] }}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No confirmed game results yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
       </div>
     </div>
 
-    <div class="section">
-      {% for group in per_game_groups %}
-      <h2>{{ group['game_name']|title }}</h2>
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Games</th>
-            <th>Wins</th>
-            <th>Win Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in group['rows'] %}
-          <tr>
-            <td>{{ row['player_name'] }}</td>
-            <td>{{ row['games_played'] }}</td>
-            <td>{{ row['wins'] }}</td>
-            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="content-view" data-view="dune" role="tabpanel" hidden>
+      <div class="section">
+        <h2>Dune</h2>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in dune_rows %}
+            <tr>
+              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No Dune results yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
       </div>
-      {% else %}
-      <div class="table-wrap">
-      <table>
-        <tbody>
-          <tr><td>No per-game results yet.</td></tr>
-        </tbody>
-      </table>
-      </div>
-      {% endfor %}
     </div>
 
-    <div class="section">
-      <h2>Root Factions</h2>
-
-      <h3>Share of games involving each faction</h3>
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Faction</th>
-            <th>Games</th>
-            <th>Share</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in root_faction_share %}
-          {% set palette = root_faction_palette.get(row['faction_name']) %}
-          <tr>
-            <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-            <td>{{ row['games_with_faction'] }} / {{ row['total_games'] }}</td>
-            <td>{{ '%.1f%%'|format(row['game_share'] * 100) }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="3">No Root faction data yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      </div>
-
-      <h3>Win rates by faction</h3>
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Faction</th>
-            <th>Games</th>
-            <th>Wins</th>
-            <th>Win Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in root_faction_win_rates %}
-          {% set palette = root_faction_palette.get(row['faction_name']) %}
-          <tr>
-            <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-            <td>{{ row['games_played'] }}</td>
-            <td>{{ row['wins'] }}</td>
-            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="4">No Root faction win-rate data yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      </div>
-
-      <h3>Win rate vs each other faction</h3>
-      <p class="matrix-hint">Rows = faction being measured. Columns = opponent faction.</p>
-      <div class="table-wrap">
-      {% if root_faction_matchup_matrix %}
-      <table class="matrix-table">
-        <thead>
-          <tr>
-            <th>
-              <select id="matrix-metric-select" class="matrix-metric-select" aria-label="Matrix metric">
-                <option value="win_rate" selected>Win rate</option>
-                <option value="wins">Number of wins</option>
-              </select>
-            </th>
-            {% for column_faction_name in root_faction_matchup_factions %}
-            {% set column_palette = root_faction_palette.get(column_faction_name) %}
-            <th class="faction-cell"{% if column_palette %} style="background:#{{ column_palette['hex'] }}; color:{{ column_palette['text'] }};"{% endif %}>{{ column_faction_name }}</th>
+    <div class="content-view" data-view="everdell" role="tabpanel" hidden>
+      <div class="section">
+        <h2>Everdell</h2>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in everdell_rows %}
+            <tr>
+              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No Everdell results yet.</td></tr>
             {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in root_faction_matchup_matrix %}
-          {% set faction_palette = root_faction_palette.get(row['faction_name']) %}
-          <tr>
-            <td class="faction-cell"{% if faction_palette %} style="background:#{{ faction_palette['hex'] }}; color:{{ faction_palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-            {% for cell in row['cells'] %}
-            {% set opponent_faction_name = root_faction_matchup_factions[loop.index0] %}
-            <td class="{% if cell['win_rate'] is not none %}matchup-value-cell {% endif %}{% if cell['is_diagonal'] %}matrix-diagonal{% elif cell['win_rate'] is none %}matrix-empty{% endif %}"{% if cell['win_rate'] is not none %} data-win-rate="{{ '%.1f%%'|format(cell['win_rate'] * 100) }}" data-wins="{{ cell['wins'] }}" data-win-rate-title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}" data-wins-title="{{ row['faction_name'] }} wins vs {{ opponent_faction_name }}: {{ cell['wins'] }}" data-win-bg="{{ cell['background'] }}" data-win-text="{{ cell['text'] }}" style="background:{{ cell['background'] }}; color:{{ cell['text'] }};" title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}"{% endif %}>
-              {% if cell['win_rate'] is not none %}
-              {{ '%.1f%%'|format(cell['win_rate'] * 100) }}
-              {% else %}
-              —
-              {% endif %}
-            </td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <table>
-        <tbody>
-          <tr><td>No Root matchup data yet.</td></tr>
-        </tbody>
-      </table>
-      {% endif %}
+          </tbody>
+        </table>
+        </div>
       </div>
+    </div>
 
-      <h3>Faction stats by player</h3>
-      {% for group in root_player_faction_groups %}
-      <h3>{{ group['player_name'] }}</h3>
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Faction</th>
-            <th>Games</th>
-            <th>Wins</th>
-            <th>Win Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in group['rows'] %}
-          {% set palette = root_faction_palette.get(row['faction_name']) %}
-          <tr>
-            <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-            <td>{{ row['games_played'] }}</td>
-            <td>{{ row['wins'] }}</td>
-            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="content-view" data-view="root" role="tabpanel" hidden>
+      <div class="section">
+        <h2>Root</h2>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in root_rows %}
+            <tr>
+              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No Root results yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+
+        <h2>Root Factions</h2>
+
+        <h3>Share of games involving each faction</h3>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Faction</th>
+              <th>Games</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in root_faction_share %}
+            {% set palette = root_faction_palette.get(row['faction_name']) %}
+            <tr>
+              <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
+              <td>{{ row['games_with_faction'] }} / {{ row['total_games'] }}</td>
+              <td>{{ '%.1f%%'|format(row['game_share'] * 100) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">No Root faction data yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+
+        <h3>Win rates by faction</h3>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Faction</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in root_faction_win_rates %}
+            {% set palette = root_faction_palette.get(row['faction_name']) %}
+            <tr>
+              <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No Root faction win-rate data yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+
+        <h3>Win rate vs each other faction</h3>
+        <p class="matrix-hint">Rows = faction being measured. Columns = opponent faction.</p>
+        <div class="table-wrap">
+        {% if root_faction_matchup_matrix %}
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>
+                <select id="matrix-metric-select" class="matrix-metric-select" aria-label="Matrix metric">
+                  <option value="win_rate" selected>Win rate</option>
+                  <option value="wins">Number of wins</option>
+                </select>
+              </th>
+              {% for column_faction_name in root_faction_matchup_factions %}
+              {% set column_palette = root_faction_palette.get(column_faction_name) %}
+              <th class="faction-cell"{% if column_palette %} style="background:#{{ column_palette['hex'] }}; color:{{ column_palette['text'] }};"{% endif %}>{{ column_faction_name }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in root_faction_matchup_matrix %}
+            {% set faction_palette = root_faction_palette.get(row['faction_name']) %}
+            <tr>
+              <td class="faction-cell"{% if faction_palette %} style="background:#{{ faction_palette['hex'] }}; color:{{ faction_palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
+              {% for cell in row['cells'] %}
+              {% set opponent_faction_name = root_faction_matchup_factions[loop.index0] %}
+              <td class="{% if cell['win_rate'] is not none %}matchup-value-cell {% endif %}{% if cell['is_diagonal'] %}matrix-diagonal{% elif cell['win_rate'] is none %}matrix-empty{% endif %}"{% if cell['win_rate'] is not none %} data-win-rate="{{ '%.1f%%'|format(cell['win_rate'] * 100) }}" data-wins="{{ cell['wins'] }}" data-win-rate-title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}" data-wins-title="{{ row['faction_name'] }} wins vs {{ opponent_faction_name }}: {{ cell['wins'] }}" data-win-bg="{{ cell['background'] }}" data-win-text="{{ cell['text'] }}" style="background:{{ cell['background'] }}; color:{{ cell['text'] }};" title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}"{% endif %}>
+                {% if cell['win_rate'] is not none %}
+                {{ '%.1f%%'|format(cell['win_rate'] * 100) }}
+                {% else %}
+                —
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <table>
+          <tbody>
+            <tr><td>No Root matchup data yet.</td></tr>
+          </tbody>
+        </table>
+        {% endif %}
+        </div>
+
+        <h3>Faction stats by player</h3>
+        {% for group in root_player_faction_groups %}
+        <h3>{{ group['player_name'] }}</h3>
+        <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Faction</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in group['rows'] %}
+            {% set palette = root_faction_palette.get(row['faction_name']) %}
+            <tr>
+              <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>No player faction stats yet.</td></tr>
+          </tbody>
+        </table>
+        </div>
+        {% endfor %}
       </div>
-      {% else %}
-      <div class="table-wrap">
-      <table>
-        <tbody>
-          <tr><td>No player faction stats yet.</td></tr>
-        </tbody>
-      </table>
-      </div>
-      {% endfor %}
     </div>
     </div>
     <script>
@@ -526,6 +621,43 @@
           }
           applyMatchupMetric(target.value);
         });
+      }
+
+      const availableViews = ["overall", "dune", "everdell", "root"];
+      const viewTabs = Array.from(document.querySelectorAll(".view-tab"));
+      const viewPanels = Array.from(document.querySelectorAll(".content-view"));
+
+      function setActiveView(viewName, updateHash = true) {
+        if (!availableViews.includes(viewName)) {
+          return;
+        }
+        viewTabs.forEach((tab) => {
+          const active = tab.dataset.view === viewName;
+          tab.classList.toggle("active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        viewPanels.forEach((panel) => {
+          const active = panel.dataset.view === viewName;
+          panel.classList.toggle("active", active);
+          panel.hidden = !active;
+        });
+        if (updateHash) {
+          window.location.hash = viewName;
+        }
+      }
+
+      viewTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const nextView = tab.dataset.view || "overall";
+          setActiveView(nextView);
+        });
+      });
+
+      const hashView = (window.location.hash || "").replace("#", "").trim().toLowerCase();
+      if (availableViews.includes(hashView)) {
+        setActiveView(hashView, false);
+      } else {
+        setActiveView("overall", false);
       }
 
       document.querySelectorAll("table").forEach((table) => {

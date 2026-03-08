@@ -1116,6 +1116,14 @@ def group_per_game_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
     return [{"game_name": game_name, "rows": game_rows} for game_name, game_rows in grouped.items()]
 
 
+def per_game_rows_map(rows: list[sqlite3.Row]) -> dict[str, list[sqlite3.Row]]:
+    grouped: dict[str, list[sqlite3.Row]] = {}
+    for row in rows:
+        game_name = str(row["game_name"]).strip().lower()
+        grouped.setdefault(game_name, []).append(row)
+    return grouped
+
+
 @app.route("/")
 def home():
     with db_conn() as conn:
@@ -1123,7 +1131,7 @@ def home():
         backfill_root_factions(conn)
         leaderboard = leaderboard_rows(conn)
         per_game = per_game_win_rates(conn)
-        per_game_groups = group_per_game_rows(per_game)
+        per_game_map = per_game_rows_map(per_game)
         root_faction_share = root_faction_share_rows(conn)
         root_faction_win_rates = root_faction_win_rate_rows(conn)
         root_faction_matchups = root_faction_matchup_rows(conn)
@@ -1138,7 +1146,7 @@ def home():
         "home.html",
         leaderboard=leaderboard,
         per_game=per_game,
-        per_game_groups=per_game_groups,
+        per_game_map=per_game_map,
         root_faction_share=root_faction_share,
         root_faction_win_rates=root_faction_win_rates,
         root_faction_matchup_factions=root_faction_matchup_factions,
