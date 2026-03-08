@@ -1861,7 +1861,12 @@
         table.querySelectorAll("td.matchup-value-cell").forEach((cell) => {
           if (metric === "wins") {
             cell.textContent = cell.dataset.wins || "";
-            cell.removeAttribute("style");
+            if (cell.dataset.winBg) {
+              cell.style.background = cell.dataset.winBg;
+            }
+            if (cell.dataset.winText) {
+              cell.style.color = cell.dataset.winText;
+            }
             cell.title = cell.dataset.winsTitle || "";
             return;
           }
