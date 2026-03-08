@@ -43,6 +43,7 @@ This repo includes:
 
 - Static builder script: `build_static_site.py`
 - GitHub Pages workflow: `.github/workflows/publish-pages.yml`
+- The workflow deploys committed `docs/` files as-is.
 
 ### First-time setup
 
@@ -60,7 +61,7 @@ This repo includes:
 3. Rebuild static page:
    - `python build_static_site.py`
 4. Commit and push:
-   - `git add screenshots leaderboard.db docs/index.html`
+   - `git add screenshots docs/index.html`
    - `git commit -m "Add new game result"`
    - `git push`
 5. GitHub Pages auto-refreshes from the workflow.
@@ -76,6 +77,7 @@ This repo includes:
 ## Notes
 
 - Images are referenced by absolute path in the database.
+- For GitHub Pages, `docs/index.html` is the published source of truth.
 - If OCR is unavailable, screenshots can still be reviewed manually.
 - The leaderboard ranking uses overall win share (wins / games played), and also shows per-game win share.
 - For matches with non-numeric dominance/coalition markers, winner detection uses placement order (1st place) instead of VP totals.
