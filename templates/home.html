@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Board Game Leaderboard</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 24px; }
+      h1, h2 { margin-bottom: 8px; }
+      table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background: #f5f5f5; }
+      .card { border: 1px solid #e2e2e2; border-radius: 8px; padding: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>Board Game Leaderboard</h1>
+
+    <div class="card" style="margin-top: 20px;">
+      <h2>Leaderboard</h2>
+      <p>Ranked by overall win share (wins / games played).</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Games</th>
+            <th>Wins</th>
+            <th>Win Rate</th>
+            <th>Placement Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in leaderboard %}
+          <tr>
+            <td>{{ row['name'] }}</td>
+            <td>{{ row['games_played'] }}</td>
+            <td>{{ row['wins'] }}</td>
+            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            <td>{{ row['placement_points'] }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5">No confirmed game results yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+      <h2>Per-game win rate</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Game</th>
+            <th>Player</th>
+            <th>Games</th>
+            <th>Wins</th>
+            <th>Win Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in per_game %}
+          <tr>
+            <td>{{ row['game_name'] }}</td>
+            <td>{{ row['player_name'] }}</td>
+            <td>{{ row['games_played'] }}</td>
+            <td>{{ row['wins'] }}</td>
+            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5">No per-game results yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

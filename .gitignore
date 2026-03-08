@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+leaderboard.db
+.DS_Store

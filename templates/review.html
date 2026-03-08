@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Review Screenshot #{{ match['id'] }}</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 24px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+      textarea, input, select { width: 100%; padding: 8px; margin-bottom: 10px; }
+      button { padding: 8px 12px; }
+      code { background: #f7f7f7; padding: 2px 4px; border-radius: 4px; }
+      img { max-width: 100%; height: auto; }
+      pre { white-space: pre-wrap; background: #f7f7f7; border-radius: 6px; padding: 8px; max-height: 360px; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <p><a href="{{ url_for('home') }}">← Back</a></p>
+    <h1>Review screenshot #{{ match['id'] }}</h1>
+
+    <div class="grid">
+      <div class="card">
+        <img src="{{ url_for('serve_image', match_id=match['id']) }}" alt="Screenshot" />
+        <p><strong>Path:</strong> {{ match['screenshot_path'] }}</p>
+        <p><strong>Relevance score:</strong> {{ '%.2f'|format(match['relevance_score']) }}</p>
+      </div>
+
+      <div class="card">
+        <form method="post">
+          <label>Game name</label>
+          <input type="text" name="game_name" placeholder="e.g. Catan" required />
+
+          <label>Winner rule</label>
+          <select name="higher_is_better">
+            <option value="1">Higher score wins</option>
+            <option value="0">Lower score wins</option>
+          </select>
+
+          <label>Played at (optional)</label>
+          <input type="text" name="played_at" value="{{ match['played_at'] or '' }}" />
+
+          <label>Scores (one per line)</label>
+          <p>Use <code>Player,Score</code> or <code>Player,NA</code> for non-numeric dominance/coalition markers.</p>
+          <textarea name="scores_text" rows="10">{{ scores_text }}</textarea>
+
+          <button type="submit" name="action" value="save">Save result</button>
+          <button type="submit" name="action" value="ignore">Ignore screenshot</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+      <h2>OCR text</h2>
+      {% if not ocr_available %}
+      <p>OCR is not available in this environment.</p>
+      {% endif %}
+      <pre>{{ match['ocr_text'] or 'No OCR output.' }}</pre>
+    </div>
+  </body>
+</html>
