@@ -187,9 +187,9 @@
 
     <div class="view-tabs" role="tablist" aria-label="Leaderboard views">
       <button type="button" class="view-tab active" data-view="overall" role="tab" aria-selected="true">Overall</button>
-      <button type="button" class="view-tab" data-view="dune" role="tab" aria-selected="false">Dune</button>
-      <button type="button" class="view-tab" data-view="everdell" role="tab" aria-selected="false">Everdell</button>
       <button type="button" class="view-tab" data-view="root" role="tab" aria-selected="false">Root</button>
+      <button type="button" class="view-tab" data-view="everdell" role="tab" aria-selected="false">Everdell</button>
+      <button type="button" class="view-tab" data-view="dune" role="tab" aria-selected="false">Dune</button>
     </div>
 
     <div class="content-view active" data-view="overall" role="tabpanel">
@@ -2073,7 +2073,7 @@
         });
       }
 
-      const availableViews = ["overall", "dune", "everdell", "root"];
+      const availableViews = ["overall", "root", "everdell", "dune"];
       const viewTabs = Array.from(document.querySelectorAll(".view-tab"));
       const viewPanels = Array.from(document.querySelectorAll(".content-view"));
 
