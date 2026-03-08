@@ -1,19 +1,39 @@
 # Board Game Leaderboard (Screenshot-driven)
 
-This app helps build an online leaderboard from screenshot results of games.
+A configurable leaderboard system that ingests game-result screenshots, supports manual review, and publishes a static site.
 
-It is designed for mixed screenshot sources (you + friends), so it does **not** infer winners from words like "victory" / "defeat". Instead, it uses extracted per-player scores and a game-specific winner rule.
+The core pipeline is game-agnostic. Game-specific analytics (currently Root faction analytics) are treated as optional modules.
 
-## Features
+## What this project does
 
-- Scan a screenshots folder recursively
-- OCR text extraction per image (if Tesseract is installed)
-- Heuristic relevance scoring to find likely result screenshots
-- Manual review/confirmation flow for each candidate
-- SQLite-backed leaderboard with wins, placement points, and win-share metrics
-- Root faction analytics from color-sampled end-screen bars
-- Static export of the homepage to `docs/index.html`
-- GitHub Pages workflow that publishes the static page on push to `main`
+- Recursively scans screenshot folders
+- Extracts OCR text (if Tesseract is available)
+- Scores screenshot relevance to find likely result screens
+- Supports manual review/confirmation for extracted scores
+- Stores matches/scores in SQLite
+- Computes overall and per-game win metrics
+- Exports static HTML (`docs/index.html`) for GitHub Pages
+
+## Architecture
+
+### Core (generic)
+
+- Match ingestion + OCR
+- Score parsing + canonical player aliases
+- Match review/save flow
+- Overall + per-game leaderboards
+- Static build and publish pipeline
+
+### Optional modules
+
+- Controlled by `ENABLED_MODULES`
+- Current module: `root`
+- Root module adds:
+  - color-sample faction inference
+  - Root-only faction analytics (share, win rates, matchup matrix, player-faction stats)
+  - Root-specific UI sections
+
+Root module data/context is loaded through a module boundary (`load_root_module_context`) and injected into templates only when enabled.
 
 ## Quick start
 
@@ -38,80 +58,80 @@ python app.py
 
 5. Open [http://localhost:8080](http://localhost:8080)
 
-## Optional modules
+## Module configuration
 
-Feature modules can be enabled or disabled via `ENABLED_MODULES`.
+Set enabled modules via `ENABLED_MODULES` (comma-separated).
 
-- Default: `root`
-- Example (Root disabled):
+- Default (unset): `root`
+- Disable all modules:
 
 ```bash
 ENABLED_MODULES="" python app.py
 ```
 
-- Example (Root enabled explicitly):
+- Enable Root explicitly:
 
 ```bash
 ENABLED_MODULES="root" python app.py
 ```
 
-When `root` is disabled, Root-specific ingestion/analytics and the Root tab are hidden.
+When `root` is disabled, Root-specific inference/analytics and the Root tab are hidden.
 
-## Publish a static public page (GitHub Pages)
+## Data and privacy model
 
-This repo includes:
+This repo is intended to stay broadly reusable and safe to share publicly:
 
-- Static builder script: `build_static_site.py`
-- GitHub Pages workflow: `.github/workflows/publish-pages.yml`
-- The workflow deploys committed `docs/` files as-is.
+- keep private screenshots and local DB outside tracked git files
+- publish only generated static output + reusable code/config
+- avoid committing personal raw game data
+
+Current `.gitignore` is configured to exclude local/private game assets.
+
+## Publish static site (GitHub Pages)
+
+### Included
+
+- static builder: `build_static_site.py`
+- pages workflow: `.github/workflows/publish-pages.yml`
+- publish target: `docs/index.html`
 
 ### First-time setup
 
-1. In GitHub, open repository **Settings → Pages**.
-2. Under **Build and deployment**, choose **GitHub Actions**.
-3. Push to `main` (or run the workflow manually from Actions).
-4. GitHub will publish `docs/index.html` as the public site.
+1. In GitHub: **Settings → Pages**
+2. Under **Build and deployment**, choose **GitHub Actions**
+3. Push to `main` (or run workflow manually)
 
-### Ongoing update flow (new finished game)
+### Ongoing update flow
 
-1. Add the new screenshot file under `screenshots/<game>/`.
-2. Run the local app and review/save scores for the new match:
-   - `python app.py`
-   - open `http://localhost:8080` and save the result.
-3. Run one command to rebuild + commit + push:
-   - `./update_and_publish.sh "Add new game result"`
-4. GitHub Pages auto-refreshes from the workflow.
+1. Add new screenshot(s) locally
+2. Run app and review/save matches
+3. Rebuild and publish:
 
-### Root faction colors
+```bash
+./update_and_publish.sh "Add new game result"
+```
 
-- Baseline file: `root_faction_colors.csv`
+The script:
+
+- builds `docs/index.html` from local `leaderboard.db`
+- stages `docs/index.html`, `root_faction_colors.csv`, and `README.md`
+- commits and pushes to `main`
+
+## Root module notes
+
+- Baseline color file: `root_faction_colors.csv`
 - Columns: `Faction`, `Color Sample 1`, `Color Sample 2`
-- Use 6-char RGB hex values (no `#` required), e.g. `11823E`
-- On save/rebuild, Root faction assignments are auto-detected from screenshot bar colors.
+- Use 6-char hex RGB values (without `#`), e.g. `11823E`
+- Root faction assignment runs on save/rebuild when Root module is enabled
 
-### One-command publisher
+## Extending to other games/modules
 
-- Script: `update_and_publish.sh`
-- Default usage: `./update_and_publish.sh`
-- Custom commit message: `./update_and_publish.sh "Add root game from 2026-03-08"`
-- The script will:
-  - build `docs/index.html` from local `leaderboard.db`
-  - stage `docs/index.html`, `root_faction_colors.csv`, and `README.md`
-  - commit and push to `main`
+To add another module, follow the Root pattern:
 
-## Workflow
+1. Add module-specific inference/analytics helpers
+2. Gate logic with `module_enabled("<module_name>")`
+3. Return module context dict (like `load_root_module_context`)
+4. Render module UI conditionally in templates
+5. Keep core leaderboard flow unchanged
 
-1. Scan your screenshots folder (e.g. `~/Desktop/Screenshots`).
-2. Open `Review` on high-relevance screenshots.
-3. Confirm game name + score lines (`Player,Score`).
-   - For non-numeric dominance/coalition result markers, use `Player,NA`.
-4. Save result to update leaderboard.
-   - For Root matches, faction colors are auto-captured and included in Root faction breakdown tables.
-
-## Notes
-
-- Images are referenced by absolute path in the database.
-- For GitHub Pages, `docs/index.html` is the published source of truth.
-- If OCR is unavailable, screenshots can still be reviewed manually.
-- The leaderboard ranking uses overall win share (wins / games played), and also shows per-game win share.
-- For matches with non-numeric dominance/coalition markers, winner detection uses placement order (1st place) instead of VP totals.
+This keeps the project usable as a general screenshot leaderboard framework while still supporting rich game-specific analytics.
