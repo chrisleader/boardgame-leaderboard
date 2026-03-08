@@ -1095,7 +1095,7 @@ def root_player_faction_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
         JOIN games g ON g.id = m.game_id AND g.name = 'root'
         LEFT JOIN match_winners mw ON mw.match_id = mpf.match_id AND mw.player_id = mpf.player_id
         GROUP BY p.id, p.name, f.name
-        ORDER BY p.name ASC, games_played DESC, win_rate DESC, wins DESC, faction_name ASC
+        ORDER BY p.name ASC, win_rate DESC, wins DESC, games_played DESC, faction_name ASC
         """
     ).fetchall()
 

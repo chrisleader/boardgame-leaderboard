@@ -208,7 +208,7 @@
           <tbody>
             {% for row in leaderboard %}
             <tr>
-              <td>{{ row['name'] }}</td>
+              <td>{{ row['name'] }}{% if loop.index == 1 %} 🥇{% elif loop.index == 2 %} 🥈{% elif loop.index == 3 %} 🥉{% endif %}</td>
               <td>{{ row['games_played'] }}</td>
               <td>{{ row['wins'] }}</td>
               <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
@@ -431,14 +431,14 @@
               </tr>
             </thead>
             <tbody>
-              {% for row in group['rows'] %}
-              {% set palette = root_faction_palette.get(row['faction_name']) %}
-              <tr>
-                <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-                <td>{{ row['games_played'] }}</td>
-                <td>{{ row['wins'] }}</td>
-                <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-              </tr>
+            {% for row in group['rows'] %}
+            {% set palette = root_faction_palette.get(row['faction_name']) %}
+            <tr>
+              <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}{% if loop.index == 1 %} 🥇{% elif loop.index == 2 %} 🥈{% elif loop.index == 3 %} 🥉{% endif %}</td>
+              <td>{{ row['games_played'] }}</td>
+              <td>{{ row['wins'] }}</td>
+              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            </tr>
               {% endfor %}
             </tbody>
           </table>
