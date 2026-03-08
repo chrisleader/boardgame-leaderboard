@@ -66,10 +66,25 @@
       .matrix-table .faction-cell {
         text-align: left;
       }
+      .matrix-hint {
+        margin: 6px 0 10px;
+        color: #4b5563;
+        font-size: 0.95rem;
+      }
+      .matrix-empty {
+        background: #f8fafc;
+        color: #9ca3af;
+      }
+      .matrix-diagonal {
+        background: #e5e7eb;
+        color: #6b7280;
+        font-weight: 600;
+      }
 
       @media (max-width: 640px) {
         .container { padding: 12px; }
         th, td { font-size: 0.92rem; padding: 7px; }
+        .matrix-hint { font-size: 0.9rem; }
       }
     </style>
   </head>
@@ -197,12 +212,13 @@
       </div>
 
       <h3>Win rate vs each other faction</h3>
+      <p class="matrix-hint"><strong>Rows = faction being measured.</strong> Columns = opponent faction. Each cell shows the row faction’s win rate vs the column faction.</p>
       <div class="table-wrap">
       {% if root_faction_matchup_matrix %}
       <table class="matrix-table">
         <thead>
           <tr>
-            <th>Faction</th>
+            <th>Row \ Column</th>
             {% for column_faction_name in root_faction_matchup_factions %}
             {% set column_palette = root_faction_palette.get(column_faction_name) %}
             <th class="faction-cell"{% if column_palette %} style="background:#{{ column_palette['hex'] }}; color:{{ column_palette['text'] }};"{% endif %}>{{ column_faction_name }}</th>
@@ -214,10 +230,11 @@
           {% set faction_palette = root_faction_palette.get(row['faction_name']) %}
           <tr>
             <td class="faction-cell"{% if faction_palette %} style="background:#{{ faction_palette['hex'] }}; color:{{ faction_palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-            {% for win_rate in row['cells'] %}
-            <td>
-              {% if win_rate is not none %}
-              {{ '%.1f%%'|format(win_rate * 100) }}
+            {% for cell in row['cells'] %}
+            {% set opponent_faction_name = root_faction_matchup_factions[loop.index0] %}
+            <td class="{% if cell['is_diagonal'] %}matrix-diagonal{% elif cell['win_rate'] is none %}matrix-empty{% endif %}"{% if cell['win_rate'] is not none %} style="background:{{ cell['background'] }}; color:{{ cell['text'] }};" title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}"{% endif %}>
+              {% if cell['win_rate'] is not none %}
+              {{ '%.1f%%'|format(cell['win_rate'] * 100) }}
               {% else %}
               —
               {% endif %}

@@ -66,10 +66,25 @@
       .matrix-table .faction-cell {
         text-align: left;
       }
+      .matrix-hint {
+        margin: 6px 0 10px;
+        color: #4b5563;
+        font-size: 0.95rem;
+      }
+      .matrix-empty {
+        background: #f8fafc;
+        color: #9ca3af;
+      }
+      .matrix-diagonal {
+        background: #e5e7eb;
+        color: #6b7280;
+        font-weight: 600;
+      }
 
       @media (max-width: 640px) {
         .container { padding: 12px; }
         th, td { font-size: 0.92rem; padding: 7px; }
+        .matrix-hint { font-size: 0.9rem; }
       }
     </style>
   </head>
@@ -464,12 +479,13 @@
       </div>
 
       <h3>Win rate vs each other faction</h3>
+      <p class="matrix-hint"><strong>Rows = faction being measured.</strong> Columns = opponent faction. Each cell shows the row faction’s win rate vs the column faction.</p>
       <div class="table-wrap">
       
       <table class="matrix-table">
         <thead>
           <tr>
-            <th>Faction</th>
+            <th>Row \ Column</th>
             
             
             <th class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</th>
@@ -509,61 +525,71 @@
           <tr>
             <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E2BC; color:#111827;" title="Corvid Conspiracy win rate vs Eyrie Dynasties: 36.4%">
               
               36.4%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1EBBC; color:#111827;" title="Corvid Conspiracy win rate vs Keepers in Iron: 44.4%">
               
               44.4%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#E6F1BC; color:#111827;" title="Corvid Conspiracy win rate vs Lizard Cult: 60.0%">
               
               60.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Corvid Conspiracy win rate vs Lord of the Hundreds: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Corvid Conspiracy win rate vs Marquise de Cat: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DABC; color:#111827;" title="Corvid Conspiracy win rate vs Riverfolk Company: 28.6%">
               
               28.6%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1F1BC; color:#111827;" title="Corvid Conspiracy win rate vs Underground Duchy: 50.0%">
               
               50.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E9BC; color:#111827;" title="Corvid Conspiracy win rate vs Vagabond: 42.9%">
               
               42.9%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DCBC; color:#111827;" title="Corvid Conspiracy win rate vs Woodland Alliance: 30.0%">
               
               30.0%
               
@@ -575,61 +601,71 @@
           <tr>
             <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
             
-            <td>
+            
+            <td class="" style="background:#F1C5BC; color:#111827;" title="Eyrie Dynasties win rate vs Corvid Conspiracy: 9.1%">
               
               9.1%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Eyrie Dynasties win rate vs Keepers in Iron: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1F1BC; color:#111827;" title="Eyrie Dynasties win rate vs Lizard Cult: 50.0%">
               
               50.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D1BC; color:#111827;" title="Eyrie Dynasties win rate vs Lord of the Hundreds: 20.0%">
               
               20.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Eyrie Dynasties win rate vs Marquise de Cat: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#E9F1BC; color:#111827;" title="Eyrie Dynasties win rate vs Riverfolk Company: 57.1%">
               
               57.1%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DFBC; color:#111827;" title="Eyrie Dynasties win rate vs Underground Duchy: 33.3%">
               
               33.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Eyrie Dynasties win rate vs Vagabond: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D9BC; color:#111827;" title="Eyrie Dynasties win rate vs Woodland Alliance: 27.8%">
               
               27.8%
               
@@ -641,61 +677,71 @@
           <tr>
             <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
             
-            <td>
+            
+            <td class="" style="background:#F1C7BC; color:#111827;" title="Keepers in Iron win rate vs Corvid Conspiracy: 11.1%">
               
               11.1%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C9BC; color:#111827;" title="Keepers in Iron win rate vs Eyrie Dynasties: 12.5%">
               
               12.5%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Keepers in Iron win rate vs Lizard Cult: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D1BC; color:#111827;" title="Keepers in Iron win rate vs Lord of the Hundreds: 20.0%">
               
               20.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DFBC; color:#111827;" title="Keepers in Iron win rate vs Marquise de Cat: 33.3%">
               
               33.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Keepers in Iron win rate vs Riverfolk Company: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D3BC; color:#111827;" title="Keepers in Iron win rate vs Underground Duchy: 22.2%">
               
               22.2%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Keepers in Iron win rate vs Vagabond: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CBBC; color:#111827;" title="Keepers in Iron win rate vs Woodland Alliance: 14.3%">
               
               14.3%
               
@@ -707,61 +753,71 @@
           <tr>
             <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Corvid Conspiracy: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C6BC; color:#111827;" title="Lizard Cult win rate vs Eyrie Dynasties: 10.0%">
               
               10.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Keepers in Iron: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Lord of the Hundreds: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Marquise de Cat: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Lizard Cult win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C9BC; color:#111827;" title="Lizard Cult win rate vs Underground Duchy: 12.5%">
               
               12.5%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C9BC; color:#111827;" title="Lizard Cult win rate vs Vagabond: 12.5%">
               
               12.5%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D1BC; color:#111827;" title="Lizard Cult win rate vs Woodland Alliance: 20.0%">
               
               20.0%
               
@@ -773,61 +829,71 @@
           <tr>
             <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
             
-            <td>
+            
+            <td class="" style="background:#F1F1BC; color:#111827;" title="Lord of the Hundreds win rate vs Corvid Conspiracy: 50.0%">
               
               50.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Eyrie Dynasties: 40.0%">
               
               40.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Keepers in Iron: 40.0%">
               
               40.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#DFF1BC; color:#111827;" title="Lord of the Hundreds win rate vs Lizard Cult: 66.7%">
               
               66.7%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1F1BC; color:#111827;" title="Lord of the Hundreds win rate vs Marquise de Cat: 50.0%">
               
               50.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Lord of the Hundreds win rate vs Riverfolk Company: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Lord of the Hundreds win rate vs Underground Duchy: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E9BC; color:#111827;" title="Lord of the Hundreds win rate vs Vagabond: 42.9%">
               
               42.9%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Woodland Alliance: 40.0%">
               
               40.0%
               
@@ -839,61 +905,71 @@
           <tr>
             <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Marquise de Cat win rate vs Corvid Conspiracy: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E8BC; color:#111827;" title="Marquise de Cat win rate vs Eyrie Dynasties: 41.7%">
               
               41.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Keepers in Iron: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Lizard Cult: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Lord of the Hundreds: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Marquise de Cat win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Underground Duchy: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Marquise de Cat win rate vs Vagabond: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DABC; color:#111827;" title="Marquise de Cat win rate vs Woodland Alliance: 28.6%">
               
               28.6%
               
@@ -905,61 +981,71 @@
           <tr>
             <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
             
-            <td>
+            
+            <td class="" style="background:#F1CBBC; color:#111827;" title="Riverfolk Company win rate vs Corvid Conspiracy: 14.3%">
               
               14.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CBBC; color:#111827;" title="Riverfolk Company win rate vs Eyrie Dynasties: 14.3%">
               
               14.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Keepers in Iron: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DFBC; color:#111827;" title="Riverfolk Company win rate vs Lizard Cult: 33.3%">
               
               33.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Lord of the Hundreds: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DFBC; color:#111827;" title="Riverfolk Company win rate vs Marquise de Cat: 33.3%">
               
               33.3%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Riverfolk Company win rate vs Underground Duchy: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Riverfolk Company win rate vs Vagabond: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Woodland Alliance: 0.0%">
               
               0.0%
               
@@ -971,61 +1057,71 @@
           <tr>
             <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
             
-            <td>
+            
+            <td class="" style="background:#F1E3BC; color:#111827;" title="Underground Duchy win rate vs Corvid Conspiracy: 37.5%">
               
               37.5%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Underground Duchy win rate vs Eyrie Dynasties: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DFBC; color:#111827;" title="Underground Duchy win rate vs Keepers in Iron: 33.3%">
               
               33.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Underground Duchy win rate vs Lizard Cult: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#E9F1BC; color:#111827;" title="Underground Duchy win rate vs Lord of the Hundreds: 57.1%">
               
               57.1%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#BCF1BC; color:#111827;" title="Underground Duchy win rate vs Marquise de Cat: 100.0%">
               
               100.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1F1BC; color:#111827;" title="Underground Duchy win rate vs Riverfolk Company: 50.0%">
               
               50.0%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E6BC; color:#111827;" title="Underground Duchy win rate vs Vagabond: 40.0%">
               
               40.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E3BC; color:#111827;" title="Underground Duchy win rate vs Woodland Alliance: 37.5%">
               
               37.5%
               
@@ -1037,61 +1133,71 @@
           <tr>
             <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
             
-            <td>
+            
+            <td class="" style="background:#F1CBBC; color:#111827;" title="Vagabond win rate vs Corvid Conspiracy: 14.3%">
               
               14.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D6BC; color:#111827;" title="Vagabond win rate vs Eyrie Dynasties: 25.0%">
               
               25.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E6BC; color:#111827;" title="Vagabond win rate vs Keepers in Iron: 40.0%">
               
               40.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1BCBC; color:#111827;" title="Vagabond win rate vs Lizard Cult: 0.0%">
               
               0.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DABC; color:#111827;" title="Vagabond win rate vs Lord of the Hundreds: 28.6%">
               
               28.6%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C5BC; color:#111827;" title="Vagabond win rate vs Marquise de Cat: 8.3%">
               
               8.3%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Vagabond win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D1BC; color:#111827;" title="Vagabond win rate vs Underground Duchy: 20.0%">
               
               20.0%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C9BC; color:#111827;" title="Vagabond win rate vs Woodland Alliance: 12.5%">
               
               12.5%
               
@@ -1103,61 +1209,71 @@
           <tr>
             <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
             
-            <td>
+            
+            <td class="" style="background:#F1E6BC; color:#111827;" title="Woodland Alliance win rate vs Corvid Conspiracy: 40.0%">
               
               40.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D3BC; color:#111827;" title="Woodland Alliance win rate vs Eyrie Dynasties: 22.2%">
               
               22.2%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1DABC; color:#111827;" title="Woodland Alliance win rate vs Keepers in Iron: 28.6%">
               
               28.6%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D1BC; color:#111827;" title="Woodland Alliance win rate vs Lizard Cult: 20.0%">
               
               20.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1D1BC; color:#111827;" title="Woodland Alliance win rate vs Lord of the Hundreds: 20.0%">
               
               20.0%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E2BC; color:#111827;" title="Woodland Alliance win rate vs Marquise de Cat: 35.7%">
               
               35.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1CDBC; color:#111827;" title="Woodland Alliance win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1C9BC; color:#111827;" title="Woodland Alliance win rate vs Underground Duchy: 12.5%">
               
               12.5%
               
             </td>
             
-            <td>
+            
+            <td class="" style="background:#F1E3BC; color:#111827;" title="Woodland Alliance win rate vs Vagabond: 37.5%">
               
               37.5%
               
             </td>
             
-            <td>
+            
+            <td class="matrix-diagonal">
               
               —
               

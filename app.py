@@ -1008,6 +1008,22 @@ def root_faction_matchup_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+def semantic_win_rate_colors(win_rate: float) -> dict[str, str]:
+    clamped = max(0.0, min(1.0, win_rate))
+    hue = 120.0 * clamped
+    saturation = 0.65
+    lightness = 0.84
+    red_f, green_f, blue_f = colorsys.hls_to_rgb(hue / 360.0, lightness, saturation)
+    red = round(red_f * 255)
+    green = round(green_f * 255)
+    blue = round(blue_f * 255)
+    rgb = (red, green, blue)
+    return {
+        "background": f"#{red:02X}{green:02X}{blue:02X}",
+        "text": best_text_color(rgb),
+    }
+
+
 def build_root_faction_matchup_matrix(
     rows: list[sqlite3.Row],
 ) -> tuple[list[str], list[dict[str, object]]]:
@@ -1024,12 +1040,35 @@ def build_root_faction_matchup_matrix(
     ordered_factions = sorted(factions)
     matrix_rows: list[dict[str, object]] = []
     for faction_name in ordered_factions:
-        cells: list[float | None] = []
+        cells: list[dict[str, object]] = []
         for opponent_faction_name in ordered_factions:
             if faction_name == opponent_faction_name:
-                cells.append(None)
+                cells.append(
+                    {
+                        "win_rate": None,
+                        "is_diagonal": True,
+                    }
+                )
                 continue
-            cells.append(win_rate_map.get((faction_name, opponent_faction_name)))
+            win_rate = win_rate_map.get((faction_name, opponent_faction_name))
+            if win_rate is None:
+                cells.append(
+                    {
+                        "win_rate": None,
+                        "is_diagonal": False,
+                    }
+                )
+                continue
+
+            style = semantic_win_rate_colors(win_rate)
+            cells.append(
+                {
+                    "win_rate": win_rate,
+                    "is_diagonal": False,
+                    "background": style["background"],
+                    "text": style["text"],
+                }
+            )
         matrix_rows.append({"faction_name": faction_name, "cells": cells})
 
     return ordered_factions, matrix_rows
