@@ -46,6 +46,37 @@
         border-color: #111827;
         color: #fff;
       }
+      .player-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 6px 0 10px;
+        padding-bottom: 2px;
+      }
+      .player-tab {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 6px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .player-tab.active {
+        background: #111827;
+        border-color: #111827;
+        color: #fff;
+      }
+      .player-panel {
+        display: none;
+      }
+      .player-panel.active {
+        display: block;
+      }
       .content-view {
         display: none;
       }
@@ -1369,450 +1400,470 @@
 
         <h3>Faction stats by player</h3>
         
-        <h3>Rahemo</h3>
-        <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faction</th>
-              <th>Games</th>
-              <th>Wins</th>
-              <th>Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
-              <td>9</td>
-              <td>6</td>
-              <td>66.7%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
-              <td>7</td>
-              <td>6</td>
-              <td>85.7%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
-              <td>7</td>
-              <td>4</td>
-              <td>57.1%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
-              <td>7</td>
-              <td>3</td>
-              <td>42.9%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
-              <td>6</td>
-              <td>4</td>
-              <td>66.7%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
-              <td>6</td>
-              <td>1</td>
-              <td>16.7%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
-              <td>5</td>
-              <td>3</td>
-              <td>60.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
-              <td>4</td>
-              <td>2</td>
-              <td>50.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
-              <td>4</td>
-              <td>2</td>
-              <td>50.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
-              <td>3</td>
-              <td>2</td>
-              <td>66.7%</td>
-            </tr>
-            
-          </tbody>
-        </table>
+        <div class="player-tabs" role="tablist" aria-label="Root player faction stats">
+          
+          <button type="button" class="player-tab active" data-player-index="0" role="tab" aria-selected="true">Rahemo</button>
+          
+          <button type="button" class="player-tab" data-player-index="1" role="tab" aria-selected="false">Saverio</button>
+          
+          <button type="button" class="player-tab" data-player-index="2" role="tab" aria-selected="false">chrisleader</button>
+          
+          <button type="button" class="player-tab" data-player-index="3" role="tab" aria-selected="false">hypersundays</button>
+          
+          <button type="button" class="player-tab" data-player-index="4" role="tab" aria-selected="false">rpanlilio</button>
+          
         </div>
         
-        <h3>Saverio</h3>
-        <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faction</th>
-              <th>Games</th>
-              <th>Wins</th>
-              <th>Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
-              <td>5</td>
-              <td>2</td>
-              <td>40.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
-              <td>4</td>
-              <td>2</td>
-              <td>50.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
-              <td>4</td>
-              <td>1</td>
-              <td>25.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
-              <td>2</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
-              <td>1</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
-              <td>1</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
-              <td>1</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-          </tbody>
-        </table>
+        <div class="player-panel active" data-player-index="0" role="tabpanel">
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Faction</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
+                <td>9</td>
+                <td>6</td>
+                <td>66.7%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
+                <td>7</td>
+                <td>6</td>
+                <td>85.7%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
+                <td>7</td>
+                <td>4</td>
+                <td>57.1%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
+                <td>7</td>
+                <td>3</td>
+                <td>42.9%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
+                <td>6</td>
+                <td>4</td>
+                <td>66.7%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
+                <td>6</td>
+                <td>1</td>
+                <td>16.7%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
+                <td>5</td>
+                <td>3</td>
+                <td>60.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
+                <td>4</td>
+                <td>2</td>
+                <td>50.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
+                <td>4</td>
+                <td>2</td>
+                <td>50.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
+                <td>3</td>
+                <td>2</td>
+                <td>66.7%</td>
+              </tr>
+              
+            </tbody>
+          </table>
+          </div>
         </div>
         
-        <h3>chrisleader</h3>
-        <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faction</th>
-              <th>Games</th>
-              <th>Wins</th>
-              <th>Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
-              <td>15</td>
-              <td>5</td>
-              <td>33.3%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
-              <td>14</td>
-              <td>5</td>
-              <td>35.7%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
-              <td>8</td>
-              <td>1</td>
-              <td>12.5%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
-              <td>5</td>
-              <td>1</td>
-              <td>20.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
-              <td>4</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
-              <td>3</td>
-              <td>1</td>
-              <td>33.3%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
-              <td>3</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
-              <td>3</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
-              <td>3</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
-              <td>2</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-          </tbody>
-        </table>
+        <div class="player-panel" data-player-index="1" role="tabpanel" hidden>
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Faction</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
+                <td>5</td>
+                <td>2</td>
+                <td>40.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
+                <td>4</td>
+                <td>2</td>
+                <td>50.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
+                <td>4</td>
+                <td>1</td>
+                <td>25.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
+                <td>2</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+            </tbody>
+          </table>
+          </div>
         </div>
         
-        <h3>hypersundays</h3>
-        <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faction</th>
-              <th>Games</th>
-              <th>Wins</th>
-              <th>Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
-              <td>10</td>
-              <td>1</td>
-              <td>10.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
-              <td>8</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
-              <td>7</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
-              <td>5</td>
-              <td>1</td>
-              <td>20.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
-              <td>5</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
-              <td>5</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
-              <td>2</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
-              <td>1</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
-              <td>1</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-          </tbody>
-        </table>
+        <div class="player-panel" data-player-index="2" role="tabpanel" hidden>
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Faction</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
+                <td>15</td>
+                <td>5</td>
+                <td>33.3%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
+                <td>14</td>
+                <td>5</td>
+                <td>35.7%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
+                <td>8</td>
+                <td>1</td>
+                <td>12.5%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
+                <td>5</td>
+                <td>1</td>
+                <td>20.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
+                <td>4</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
+                <td>3</td>
+                <td>1</td>
+                <td>33.3%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
+                <td>3</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
+                <td>3</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
+                <td>3</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
+                <td>2</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+            </tbody>
+          </table>
+          </div>
         </div>
         
-        <h3>rpanlilio</h3>
-        <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faction</th>
-              <th>Games</th>
-              <th>Wins</th>
-              <th>Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
-              <td>13</td>
-              <td>2</td>
-              <td>15.4%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
-              <td>9</td>
-              <td>1</td>
-              <td>11.1%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
-              <td>9</td>
-              <td>1</td>
-              <td>11.1%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
-              <td>9</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
-              <td>7</td>
-              <td>1</td>
-              <td>14.3%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
-              <td>6</td>
-              <td>1</td>
-              <td>16.7%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
-              <td>3</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
-              <td>2</td>
-              <td>1</td>
-              <td>50.0%</td>
-            </tr>
-            
-            
-            <tr>
-              <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
-              <td>1</td>
-              <td>0</td>
-              <td>0.0%</td>
-            </tr>
-            
-          </tbody>
-        </table>
+        <div class="player-panel" data-player-index="3" role="tabpanel" hidden>
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Faction</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
+                <td>10</td>
+                <td>1</td>
+                <td>10.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
+                <td>7</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
+                <td>5</td>
+                <td>1</td>
+                <td>20.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
+                <td>5</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
+                <td>5</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
+                <td>2</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+            </tbody>
+          </table>
+          </div>
         </div>
+        
+        <div class="player-panel" data-player-index="4" role="tabpanel" hidden>
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Faction</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
+                <td>13</td>
+                <td>2</td>
+                <td>15.4%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
+                <td>9</td>
+                <td>1</td>
+                <td>11.1%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
+                <td>9</td>
+                <td>1</td>
+                <td>11.1%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
+                <td>9</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
+                <td>7</td>
+                <td>1</td>
+                <td>14.3%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
+                <td>6</td>
+                <td>1</td>
+                <td>16.7%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</td>
+                <td>3</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
+                <td>2</td>
+                <td>1</td>
+                <td>50.0%</td>
+              </tr>
+              
+              
+              <tr>
+                <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0.0%</td>
+              </tr>
+              
+            </tbody>
+          </table>
+          </div>
+        </div>
+        
         
       </div>
     </div>
@@ -2057,6 +2108,34 @@
         setActiveView(hashView, false);
       } else {
         setActiveView("overall", false);
+      }
+
+      const playerTabs = Array.from(document.querySelectorAll(".player-tab"));
+      const playerPanels = Array.from(document.querySelectorAll(".player-panel"));
+
+      function setActivePlayerPanel(panelIndex) {
+        playerTabs.forEach((tab) => {
+          const active = tab.dataset.playerIndex === panelIndex;
+          tab.classList.toggle("active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        playerPanels.forEach((panel) => {
+          const active = panel.dataset.playerIndex === panelIndex;
+          panel.classList.toggle("active", active);
+          panel.hidden = !active;
+        });
+      }
+
+      playerTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const panelIndex = tab.dataset.playerIndex || "0";
+          setActivePlayerPanel(panelIndex);
+        });
+      });
+
+      if (playerTabs.length > 0) {
+        const defaultIndex = playerTabs[0].dataset.playerIndex || "0";
+        setActivePlayerPanel(defaultIndex);
       }
 
       document.querySelectorAll("table").forEach((table) => {

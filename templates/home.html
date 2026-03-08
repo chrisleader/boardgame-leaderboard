@@ -46,6 +46,37 @@
         border-color: #111827;
         color: #fff;
       }
+      .player-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 6px 0 10px;
+        padding-bottom: 2px;
+      }
+      .player-tab {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 6px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .player-tab.active {
+        background: #111827;
+        border-color: #111827;
+        color: #fff;
+      }
+      .player-panel {
+        display: none;
+      }
+      .player-panel.active {
+        display: block;
+      }
       .content-view {
         display: none;
       }
@@ -381,31 +412,39 @@
         </div>
 
         <h3>Faction stats by player</h3>
-        {% for group in root_player_faction_groups %}
-        <h3>{{ group['player_name'] }}</h3>
-        <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faction</th>
-              <th>Games</th>
-              <th>Wins</th>
-              <th>Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in group['rows'] %}
-            {% set palette = root_faction_palette.get(row['faction_name']) %}
-            <tr>
-              <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-              <td>{{ row['games_played'] }}</td>
-              <td>{{ row['wins'] }}</td>
-              <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        {% if root_player_faction_groups %}
+        <div class="player-tabs" role="tablist" aria-label="Root player faction stats">
+          {% for group in root_player_faction_groups %}
+          <button type="button" class="player-tab{% if loop.first %} active{% endif %}" data-player-index="{{ loop.index0 }}" role="tab" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ group['player_name'] }}</button>
+          {% endfor %}
         </div>
+        {% for group in root_player_faction_groups %}
+        <div class="player-panel{% if loop.first %} active{% endif %}" data-player-index="{{ loop.index0 }}" role="tabpanel"{% if not loop.first %} hidden{% endif %}>
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Faction</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in group['rows'] %}
+              {% set palette = root_faction_palette.get(row['faction_name']) %}
+              <tr>
+                <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
+                <td>{{ row['games_played'] }}</td>
+                <td>{{ row['wins'] }}</td>
+                <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          </div>
+        </div>
+        {% endfor %}
         {% else %}
         <div class="table-wrap">
         <table>
@@ -414,7 +453,7 @@
           </tbody>
         </table>
         </div>
-        {% endfor %}
+        {% endif %}
       </div>
     </div>
     </div>
@@ -658,6 +697,34 @@
         setActiveView(hashView, false);
       } else {
         setActiveView("overall", false);
+      }
+
+      const playerTabs = Array.from(document.querySelectorAll(".player-tab"));
+      const playerPanels = Array.from(document.querySelectorAll(".player-panel"));
+
+      function setActivePlayerPanel(panelIndex) {
+        playerTabs.forEach((tab) => {
+          const active = tab.dataset.playerIndex === panelIndex;
+          tab.classList.toggle("active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        playerPanels.forEach((panel) => {
+          const active = panel.dataset.playerIndex === panelIndex;
+          panel.classList.toggle("active", active);
+          panel.hidden = !active;
+        });
+      }
+
+      playerTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const panelIndex = tab.dataset.playerIndex || "0";
+          setActivePlayerPanel(panelIndex);
+        });
+      });
+
+      if (playerTabs.length > 0) {
+        const defaultIndex = playerTabs[0].dataset.playerIndex || "0";
+        setActivePlayerPanel(defaultIndex);
       }
 
       document.querySelectorAll("table").forEach((table) => {
