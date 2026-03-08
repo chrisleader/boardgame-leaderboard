@@ -410,6 +410,65 @@ def root_faction_samples(conn: sqlite3.Connection) -> dict[str, list[tuple[int, 
     return grouped
 
 
+def relative_luminance(rgb: tuple[int, int, int]) -> float:
+    channels: list[float] = []
+    for channel in rgb:
+        normalized = channel / 255.0
+        if normalized <= 0.03928:
+            channels.append(normalized / 12.92)
+        else:
+            channels.append(((normalized + 0.055) / 1.055) ** 2.4)
+    red, green, blue = channels
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+
+def contrast_ratio(left_rgb: tuple[int, int, int], right_rgb: tuple[int, int, int]) -> float:
+    left_luminance = relative_luminance(left_rgb)
+    right_luminance = relative_luminance(right_rgb)
+    lighter = max(left_luminance, right_luminance)
+    darker = min(left_luminance, right_luminance)
+    return (lighter + 0.05) / (darker + 0.05)
+
+
+def best_text_color(background_rgb: tuple[int, int, int]) -> str:
+    white = (255, 255, 255)
+    near_black = (17, 24, 39)
+    white_ratio = contrast_ratio(background_rgb, white)
+    black_ratio = contrast_ratio(background_rgb, near_black)
+    return "#FFFFFF" if white_ratio > black_ratio else "#111827"
+
+
+def root_faction_palette(conn: sqlite3.Connection) -> dict[str, dict[str, str]]:
+    rows = conn.execute(
+        """
+        SELECT
+            f.name AS faction_name,
+            COALESCE(
+                MAX(CASE WHEN s.sample_name = 'sample_1' THEN s.color_hex END),
+                MIN(s.color_hex)
+            ) AS color_hex
+        FROM factions f
+        LEFT JOIN faction_color_samples s ON s.faction_id = f.id
+        WHERE f.game_name = 'root'
+        GROUP BY f.name
+        ORDER BY f.name ASC
+        """
+    ).fetchall()
+    palette: dict[str, dict[str, str]] = {}
+    for row in rows:
+        color_hex = row["color_hex"]
+        if not color_hex:
+            continue
+        rgb = parse_hex_color(color_hex)
+        if rgb is None:
+            continue
+        palette[row["faction_name"]] = {
+            "hex": color_hex,
+            "text": best_text_color(rgb),
+        }
+    return palette
+
+
 def median_int(values: list[int]) -> int:
     if not values:
         return 0
@@ -968,6 +1027,7 @@ def home():
         root_faction_share = root_faction_share_rows(conn)
         root_faction_win_rates = root_faction_win_rate_rows(conn)
         root_player_factions = root_player_top_factions(conn)
+        root_faction_palette_map = root_faction_palette(conn)
 
     return render_template(
         "home.html",
@@ -977,6 +1037,7 @@ def home():
         root_faction_share=root_faction_share,
         root_faction_win_rates=root_faction_win_rates,
         root_player_factions=root_player_factions,
+        root_faction_palette=root_faction_palette_map,
     )
 
 

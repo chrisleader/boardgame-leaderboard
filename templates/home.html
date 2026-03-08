@@ -39,6 +39,9 @@
         white-space: nowrap;
       }
       th { background: #f5f5f5; }
+      .faction-cell {
+        font-weight: 600;
+      }
 
       @media (max-width: 640px) {
         .container { padding: 12px; }
@@ -129,8 +132,9 @@
         </thead>
         <tbody>
           {% for row in root_faction_share %}
+          {% set palette = root_faction_palette.get(row['faction_name']) %}
           <tr>
-            <td>{{ row['faction_name'] }}</td>
+            <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
             <td>{{ row['games_with_faction'] }} / {{ row['total_games'] }}</td>
             <td>{{ '%.1f%%'|format(row['game_share'] * 100) }}</td>
           </tr>
@@ -154,8 +158,9 @@
         </thead>
         <tbody>
           {% for row in root_faction_win_rates %}
+          {% set palette = root_faction_palette.get(row['faction_name']) %}
           <tr>
-            <td>{{ row['faction_name'] }}</td>
+            <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
             <td>{{ row['games_played'] }}</td>
             <td>{{ row['wins'] }}</td>
             <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
@@ -181,9 +186,10 @@
         </thead>
         <tbody>
           {% for row in root_player_factions %}
+          {% set palette = root_faction_palette.get(row['faction_name']) %}
           <tr>
             <td>{{ row['player_name'] }}</td>
-            <td>{{ row['faction_name'] }}</td>
+            <td class="faction-cell"{% if palette %} style="background:#{{ palette['hex'] }}; color:{{ palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
             <td>{{ row['games_played'] }}</td>
             <td>{{ row['wins'] }}</td>
             <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>

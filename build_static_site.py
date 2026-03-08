@@ -23,6 +23,7 @@ def build_static_homepage() -> Path:
         root_faction_share = leaderboard_app.root_faction_share_rows(conn)
         root_faction_win_rates = leaderboard_app.root_faction_win_rate_rows(conn)
         root_player_factions = leaderboard_app.root_player_top_factions(conn)
+        root_faction_palette = leaderboard_app.root_faction_palette(conn)
 
     with leaderboard_app.app.app_context():
         html = render_template(
@@ -33,6 +34,7 @@ def build_static_homepage() -> Path:
             root_faction_share=root_faction_share,
             root_faction_win_rates=root_faction_win_rates,
             root_player_factions=root_player_factions,
+            root_faction_palette=root_faction_palette,
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
