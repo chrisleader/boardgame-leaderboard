@@ -690,49 +690,43 @@
           const nextView = tab.dataset.view || "overall";
           setActiveView(nextView);
         });
-        tab.addEventListener("keydown", (event) => {
-          if (viewTabs.length === 0) {
+      });
+
+      function cycleActiveView(delta) {
+        if (viewTabs.length === 0) {
+          return;
+        }
+        const activeIndex = viewTabs.findIndex((tab) => tab.classList.contains("active"));
+        const startIndex = activeIndex >= 0 ? activeIndex : 0;
+        const nextIndex = (startIndex + delta + viewTabs.length) % viewTabs.length;
+        const nextTab = viewTabs[nextIndex];
+        if (!nextTab) {
+          return;
+        }
+        const nextView = nextTab.dataset.view || "overall";
+        setActiveView(nextView);
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) {
+          return;
+        }
+        const target = event.target;
+        if (target instanceof HTMLElement) {
+          const tagName = target.tagName;
+          if (target.isContentEditable || tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT") {
             return;
           }
-
-          const currentIndex = viewTabs.indexOf(tab);
-          if (currentIndex < 0) {
-            return;
-          }
-
-          if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-            event.preventDefault();
-            const delta = event.key === "ArrowRight" ? 1 : -1;
-            const nextIndex = (currentIndex + delta + viewTabs.length) % viewTabs.length;
-            const nextTab = viewTabs[nextIndex];
-            if (!nextTab) {
-              return;
-            }
-            const nextView = nextTab.dataset.view || "overall";
-            setActiveView(nextView);
-            nextTab.focus();
-            return;
-          }
-
-          if (event.key === "Home" || event.key === "End") {
-            event.preventDefault();
-            const nextIndex = event.key === "Home" ? 0 : viewTabs.length - 1;
-            const nextTab = viewTabs[nextIndex];
-            if (!nextTab) {
-              return;
-            }
-            const nextView = nextTab.dataset.view || "overall";
-            setActiveView(nextView);
-            nextTab.focus();
-            return;
-          }
-
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            const nextView = tab.dataset.view || "overall";
-            setActiveView(nextView);
-          }
-        });
+        }
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          cycleActiveView(1);
+          return;
+        }
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          cycleActiveView(-1);
+        }
       });
 
       const hashView = (window.location.hash || "").replace("#", "").trim().toLowerCase();
