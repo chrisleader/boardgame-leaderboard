@@ -4,28 +4,106 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Board Game Leaderboard</title>
+    <script>
+      (() => {
+        const storageKey = "leaderboard-theme";
+        let storedTheme = null;
+        try {
+          storedTheme = localStorage.getItem(storageKey);
+        } catch (error) {
+          storedTheme = null;
+        }
+        const hasStoredTheme = storedTheme === "dark" || storedTheme === "light";
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const theme = hasStoredTheme ? storedTheme : (prefersDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
     <style>
+      :root {
+        --bg: #ffffff;
+        --text: #111827;
+        --link: #1f2937;
+        --border: #d1d5db;
+        --table-border: #dddddd;
+        --surface: #ffffff;
+        --surface-muted: #f5f5f5;
+        --muted: #4b5563;
+        --muted-strong: #6b7280;
+        --muted-soft: #9ca3af;
+        --active-bg: #111827;
+        --active-text: #ffffff;
+        --matrix-empty-bg: #f8fafc;
+        --matrix-diagonal-bg: #e5e7eb;
+        --flash-success-bg: #ecfdf3;
+        --flash-success-border: #a7f3d0;
+        --flash-success-text: #065f46;
+        --flash-error-bg: #fef2f2;
+        --flash-error-border: #fecaca;
+        --flash-error-text: #991b1b;
+      }
+      html[data-theme="dark"] {
+        --bg: #0a0a0a;
+        --text: #e5e7eb;
+        --link: #d4d4d8;
+        --border: #3f3f46;
+        --table-border: #3f3f46;
+        --surface: #121212;
+        --surface-muted: #1c1c1c;
+        --muted: #9ca3af;
+        --muted-strong: #9ca3af;
+        --muted-soft: #6b7280;
+        --active-bg: #f5f5f5;
+        --active-text: #111827;
+        --matrix-empty-bg: #161616;
+        --matrix-diagonal-bg: #232323;
+        --flash-success-bg: #0f2a1b;
+        --flash-success-border: #22543d;
+        --flash-success-text: #b7f5d0;
+        --flash-error-bg: #341515;
+        --flash-error-border: #6a2020;
+        --flash-error-text: #fecaca;
+      }
       * { box-sizing: border-box; }
       body {
         font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         margin: 0;
-        color: #111827;
-        background: #fff;
+        color: var(--text);
+        background: var(--bg);
       }
       .container {
         max-width: 960px;
         margin: 0 auto;
         padding: 16px;
       }
-      h1 { margin: 0 0 12px; font-size: clamp(1.6rem, 5vw, 2.25rem); }
+      .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.25rem); }
       h2 { margin: 0 0 8px; font-size: clamp(1.15rem, 3.8vw, 1.55rem); }
       h3 { margin: 10px 0 8px; font-size: 1rem; }
       .section { margin-top: 20px; }
       .top-links { margin: 0 0 10px; }
-      .top-links a { color: #1f2937; }
-      .flash { border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #d1d5db; }
-      .flash-success { background: #ecfdf3; border-color: #a7f3d0; color: #065f46; }
-      .flash-error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+      .top-links a { color: var(--link); }
+      .theme-toggle {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 6px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .flash { border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+      .flash-success { background: var(--flash-success-bg); border-color: var(--flash-success-border); color: var(--flash-success-text); }
+      .flash-error { background: var(--flash-error-bg); border-color: var(--flash-error-border); color: var(--flash-error-text); }
       .view-tabs {
         display: flex;
         gap: 8px;
@@ -35,10 +113,10 @@
         padding-bottom: 2px;
       }
       .view-tab {
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--border);
         border-radius: 8px;
-        background: #fff;
-        color: #111827;
+        background: var(--surface);
+        color: var(--text);
         font: inherit;
         font-size: 0.95rem;
         font-weight: 600;
@@ -47,9 +125,9 @@
         white-space: nowrap;
       }
       .view-tab.active {
-        background: #111827;
-        border-color: #111827;
-        color: #fff;
+        background: var(--active-bg);
+        border-color: var(--active-bg);
+        color: var(--active-text);
       }
       .player-tabs {
         display: flex;
@@ -60,10 +138,10 @@
         padding-bottom: 2px;
       }
       .player-tab {
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--border);
         border-radius: 8px;
-        background: #fff;
-        color: #111827;
+        background: var(--surface);
+        color: var(--text);
         font: inherit;
         font-size: 0.9rem;
         font-weight: 600;
@@ -72,9 +150,9 @@
         white-space: nowrap;
       }
       .player-tab.active {
-        background: #111827;
-        border-color: #111827;
-        color: #fff;
+        background: var(--active-bg);
+        border-color: var(--active-bg);
+        color: var(--active-text);
       }
       .player-panel {
         display: none;
@@ -93,6 +171,30 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
       }
+      .table-wrap,
+      .view-tabs,
+      .player-tabs {
+        scrollbar-color: var(--border) var(--surface);
+      }
+      .table-wrap::-webkit-scrollbar,
+      .view-tabs::-webkit-scrollbar,
+      .player-tabs::-webkit-scrollbar {
+        height: 10px;
+        width: 10px;
+      }
+      .table-wrap::-webkit-scrollbar-track,
+      .view-tabs::-webkit-scrollbar-track,
+      .player-tabs::-webkit-scrollbar-track {
+        background: var(--surface);
+        border-radius: 999px;
+      }
+      .table-wrap::-webkit-scrollbar-thumb,
+      .view-tabs::-webkit-scrollbar-thumb,
+      .player-tabs::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 999px;
+        border: 2px solid var(--surface);
+      }
       table {
         border-collapse: collapse;
         width: max-content;
@@ -100,28 +202,28 @@
         margin-bottom: 20px;
       }
       th, td {
-        border: 1px solid #ddd;
+        border: 1px solid var(--table-border);
         padding: 8px;
         text-align: left;
         white-space: nowrap;
       }
-      th { background: #f5f5f5; }
+      th { background: var(--surface-muted); }
       th.sortable {
         cursor: pointer;
         user-select: none;
       }
       th.sortable::after {
         content: " ↕";
-        color: #6b7280;
+        color: var(--muted-strong);
         font-size: 0.85em;
       }
       th.sortable.sorted-asc::after {
         content: " ↑";
-        color: #111827;
+        color: var(--text);
       }
       th.sortable.sorted-desc::after {
         content: " ↓";
-        color: #111827;
+        color: var(--text);
       }
       .faction-cell {
         font-weight: 600;
@@ -149,11 +251,11 @@
       }
       .matrix-table thead th:first-child {
         z-index: 4;
-        background: #f5f5f5;
+        background: var(--surface-muted);
       }
       .matrix-hint {
         margin: 6px 0 10px;
-        color: #4b5563;
+        color: var(--muted);
         font-size: 0.95rem;
       }
       .matrix-metric-tabs {
@@ -162,10 +264,10 @@
         margin: 0 0 10px;
       }
       .matrix-metric-btn {
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--border);
         border-radius: 8px;
-        background: #fff;
-        color: #111827;
+        background: var(--surface);
+        color: var(--text);
         font: inherit;
         font-size: 0.9rem;
         font-weight: 600;
@@ -174,22 +276,23 @@
         white-space: nowrap;
       }
       .matrix-metric-btn.active {
-        background: #111827;
-        border-color: #111827;
-        color: #fff;
+        background: var(--active-bg);
+        border-color: var(--active-bg);
+        color: var(--active-text);
       }
       .matrix-empty {
-        background: #f8fafc;
-        color: #9ca3af;
+        background: var(--matrix-empty-bg);
+        color: var(--muted-soft);
       }
       .matrix-diagonal {
-        background: #e5e7eb;
-        color: #6b7280;
+        background: var(--matrix-diagonal-bg);
+        color: var(--muted-strong);
         font-weight: 600;
       }
 
       @media (max-width: 640px) {
         .container { padding: 12px; }
+        .header-row { align-items: flex-start; }
         th, td { font-size: 0.92rem; padding: 7px; }
         .matrix-hint { font-size: 0.9rem; }
       }
@@ -197,7 +300,10 @@
   </head>
   <body>
     <div class="container">
-    <h1>Board Game Leaderboard</h1>
+    <div class="header-row">
+      <h1>Board Game Leaderboard</h1>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">Dark mode</button>
+    </div>
     
     
     
@@ -1891,6 +1997,44 @@
     
     </div>
     <script>
+      const themeStorageKey = "leaderboard-theme";
+      const themeToggleButton = document.getElementById("theme-toggle");
+
+      function getCurrentTheme() {
+        const theme = document.documentElement.getAttribute("data-theme");
+        return theme === "dark" ? "dark" : "light";
+      }
+
+      function updateThemeButton(theme) {
+        if (!themeToggleButton) {
+          return;
+        }
+        const nextModeLabel = theme === "dark" ? "Light mode" : "Dark mode";
+        themeToggleButton.textContent = nextModeLabel;
+        themeToggleButton.setAttribute("aria-label", `Switch to ${nextModeLabel.toLowerCase()}`);
+        themeToggleButton.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+      }
+
+      function applyTheme(theme, persist = true) {
+        document.documentElement.setAttribute("data-theme", theme);
+        if (persist) {
+          try {
+            localStorage.setItem(themeStorageKey, theme);
+          } catch (error) {
+            // Ignore storage failures.
+          }
+        }
+        updateThemeButton(theme);
+      }
+
+      updateThemeButton(getCurrentTheme());
+      if (themeToggleButton) {
+        themeToggleButton.addEventListener("click", () => {
+          const nextTheme = getCurrentTheme() === "dark" ? "light" : "dark";
+          applyTheme(nextTheme, true);
+        });
+      }
+
       function parseSortValue(rawText) {
         const text = (rawText || "").trim();
         if (!text) {
