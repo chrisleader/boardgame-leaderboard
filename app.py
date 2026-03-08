@@ -966,6 +966,48 @@ def root_faction_win_rate_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+def root_faction_matchup_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    prepare_temp_views(conn)
+    return conn.execute(
+        """
+        WITH root_assignments AS (
+            SELECT
+                mpf.match_id,
+                mpf.player_id,
+                f.name AS faction_name
+            FROM match_player_factions mpf
+            JOIN matches m ON m.id = mpf.match_id AND m.relevant = 1
+            JOIN games g ON g.id = m.game_id AND g.name = 'root'
+            JOIN factions f ON f.id = mpf.faction_id AND f.game_name = 'root'
+        ),
+        faction_vs_opponent AS (
+            SELECT DISTINCT
+                ra.match_id,
+                ra.player_id,
+                ra.faction_name,
+                opp.faction_name AS opponent_faction_name
+            FROM root_assignments ra
+            JOIN root_assignments opp
+              ON opp.match_id = ra.match_id
+             AND opp.player_id != ra.player_id
+             AND opp.faction_name != ra.faction_name
+        )
+        SELECT
+            fvo.faction_name,
+            fvo.opponent_faction_name,
+            COUNT(DISTINCT fvo.match_id) AS games_against,
+            COALESCE(SUM(mw.is_winner), 0) AS wins,
+            COALESCE(SUM(mw.is_winner), 0) * 1.0 / COUNT(DISTINCT fvo.match_id) AS win_rate
+        FROM faction_vs_opponent fvo
+        LEFT JOIN match_winners mw
+          ON mw.match_id = fvo.match_id
+         AND mw.player_id = fvo.player_id
+        GROUP BY fvo.faction_name, fvo.opponent_faction_name
+        ORDER BY fvo.faction_name ASC, win_rate DESC, wins DESC, fvo.opponent_faction_name ASC
+        """
+    ).fetchall()
+
+
 def root_player_faction_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     prepare_temp_views(conn)
     return conn.execute(
@@ -1014,6 +1056,7 @@ def home():
         per_game_groups = group_per_game_rows(per_game)
         root_faction_share = root_faction_share_rows(conn)
         root_faction_win_rates = root_faction_win_rate_rows(conn)
+        root_faction_matchups = root_faction_matchup_rows(conn)
         root_player_faction_rows_data = root_player_faction_rows(conn)
         root_player_faction_groups = group_root_player_faction_rows(root_player_faction_rows_data)
         root_faction_palette_map = root_faction_palette(conn)
@@ -1025,6 +1068,7 @@ def home():
         per_game_groups=per_game_groups,
         root_faction_share=root_faction_share,
         root_faction_win_rates=root_faction_win_rates,
+        root_faction_matchups=root_faction_matchups,
         root_player_faction_groups=root_player_faction_groups,
         root_faction_palette=root_faction_palette_map,
     )

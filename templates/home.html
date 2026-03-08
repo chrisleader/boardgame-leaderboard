@@ -189,6 +189,36 @@
       </table>
       </div>
 
+      <h3>Win rate vs each other faction</h3>
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Faction</th>
+            <th>Opponent</th>
+            <th>Games</th>
+            <th>Wins</th>
+            <th>Win Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in root_faction_matchups %}
+          {% set faction_palette = root_faction_palette.get(row['faction_name']) %}
+          {% set opponent_palette = root_faction_palette.get(row['opponent_faction_name']) %}
+          <tr>
+            <td class="faction-cell"{% if faction_palette %} style="background:#{{ faction_palette['hex'] }}; color:{{ faction_palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
+            <td class="faction-cell"{% if opponent_palette %} style="background:#{{ opponent_palette['hex'] }}; color:{{ opponent_palette['text'] }};"{% endif %}>{{ row['opponent_faction_name'] }}</td>
+            <td>{{ row['games_against'] }}</td>
+            <td>{{ row['wins'] }}</td>
+            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5">No Root matchup data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+
       <h3>Faction stats by player</h3>
       {% for group in root_player_faction_groups %}
       <h3>{{ group['player_name'] }}</h3>
