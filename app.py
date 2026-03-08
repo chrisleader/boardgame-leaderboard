@@ -39,6 +39,22 @@ PLAYER_ALIASES = {
 }
 
 
+def parse_enabled_modules(raw_value: str | None) -> set[str]:
+    if raw_value is None:
+        return {"root"}
+    if not raw_value.strip():
+        return set()
+    modules = {token.strip().lower() for token in raw_value.split(",") if token.strip()}
+    return modules
+
+
+ENABLED_MODULES = parse_enabled_modules(os.getenv("ENABLED_MODULES"))
+
+
+def module_enabled(module_name: str) -> bool:
+    return module_name.strip().lower() in ENABLED_MODULES
+
+
 class ExtractedScore(NamedTuple):
     player_name: str
     score: int | None
@@ -180,7 +196,8 @@ def init_db() -> None:
                 DROP TABLE match_scores_old;
                 """
             )
-        load_root_faction_samples(conn)
+        if module_enabled("root"):
+            load_root_faction_samples(conn)
 
 
 def safe_parse_datetime(raw_value: str | None) -> str | None:
@@ -1128,35 +1145,55 @@ def per_game_rows_map(rows: list[sqlite3.Row]) -> dict[str, list[sqlite3.Row]]:
     return grouped
 
 
+def load_root_module_context(conn: sqlite3.Connection) -> dict[str, object]:
+    if not module_enabled("root"):
+        return {
+            "root_module_enabled": False,
+            "root_faction_share": [],
+            "root_faction_win_rates": [],
+            "root_faction_matchup_factions": [],
+            "root_faction_matchup_matrix": [],
+            "root_player_faction_groups": [],
+            "root_faction_palette": {},
+        }
+
+    load_root_faction_samples(conn)
+    backfill_root_factions(conn)
+    root_faction_share = root_faction_share_rows(conn)
+    root_faction_win_rates = root_faction_win_rate_rows(conn)
+    root_faction_matchups = root_faction_matchup_rows(conn)
+    root_faction_matchup_factions, root_faction_matchup_matrix = build_root_faction_matchup_matrix(
+        root_faction_matchups
+    )
+    root_player_faction_rows_data = root_player_faction_rows(conn)
+    root_player_faction_groups = group_root_player_faction_rows(root_player_faction_rows_data)
+    root_faction_palette_map = root_faction_palette(conn)
+
+    return {
+        "root_module_enabled": True,
+        "root_faction_share": root_faction_share,
+        "root_faction_win_rates": root_faction_win_rates,
+        "root_faction_matchup_factions": root_faction_matchup_factions,
+        "root_faction_matchup_matrix": root_faction_matchup_matrix,
+        "root_player_faction_groups": root_player_faction_groups,
+        "root_faction_palette": root_faction_palette_map,
+    }
+
+
 @app.route("/")
 def home():
     with db_conn() as conn:
-        load_root_faction_samples(conn)
-        backfill_root_factions(conn)
         leaderboard = leaderboard_rows(conn)
         per_game = per_game_win_rates(conn)
         per_game_map = per_game_rows_map(per_game)
-        root_faction_share = root_faction_share_rows(conn)
-        root_faction_win_rates = root_faction_win_rate_rows(conn)
-        root_faction_matchups = root_faction_matchup_rows(conn)
-        root_faction_matchup_factions, root_faction_matchup_matrix = build_root_faction_matchup_matrix(
-            root_faction_matchups
-        )
-        root_player_faction_rows_data = root_player_faction_rows(conn)
-        root_player_faction_groups = group_root_player_faction_rows(root_player_faction_rows_data)
-        root_faction_palette_map = root_faction_palette(conn)
+        root_module_context = load_root_module_context(conn)
 
     return render_template(
         "home.html",
         leaderboard=leaderboard,
         per_game=per_game,
         per_game_map=per_game_map,
-        root_faction_share=root_faction_share,
-        root_faction_win_rates=root_faction_win_rates,
-        root_faction_matchup_factions=root_faction_matchup_factions,
-        root_faction_matchup_matrix=root_faction_matchup_matrix,
-        root_player_faction_groups=root_player_faction_groups,
-        root_faction_palette=root_faction_palette_map,
+        **root_module_context,
     )
 
 
@@ -1251,7 +1288,7 @@ def review(match_id: int):
                     match_id,
                 ),
             )
-            if game_name.strip().lower() == "root":
+            if module_enabled("root") and game_name.strip().lower() == "root":
                 load_root_faction_samples(conn)
                 infer_root_factions_for_match(conn, match_id)
             flash("Result saved.", "success")

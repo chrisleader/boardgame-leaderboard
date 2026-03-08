@@ -15,20 +15,10 @@ OUTPUT_FILE = OUTPUT_DIR / "index.html"
 def build_static_homepage() -> Path:
     leaderboard_app.init_db()
     with leaderboard_app.db_conn() as conn:
-        leaderboard_app.load_root_faction_samples(conn)
-        leaderboard_app.backfill_root_factions(conn)
         leaderboard = leaderboard_app.leaderboard_rows(conn)
         per_game = leaderboard_app.per_game_win_rates(conn)
         per_game_map = leaderboard_app.per_game_rows_map(per_game)
-        root_faction_share = leaderboard_app.root_faction_share_rows(conn)
-        root_faction_win_rates = leaderboard_app.root_faction_win_rate_rows(conn)
-        root_faction_matchups = leaderboard_app.root_faction_matchup_rows(conn)
-        root_faction_matchup_factions, root_faction_matchup_matrix = (
-            leaderboard_app.build_root_faction_matchup_matrix(root_faction_matchups)
-        )
-        root_player_faction_rows = leaderboard_app.root_player_faction_rows(conn)
-        root_player_faction_groups = leaderboard_app.group_root_player_faction_rows(root_player_faction_rows)
-        root_faction_palette = leaderboard_app.root_faction_palette(conn)
+        root_module_context = leaderboard_app.load_root_module_context(conn)
 
     with leaderboard_app.app.app_context():
         html = render_template(
@@ -36,12 +26,7 @@ def build_static_homepage() -> Path:
             leaderboard=leaderboard,
             per_game=per_game,
             per_game_map=per_game_map,
-            root_faction_share=root_faction_share,
-            root_faction_win_rates=root_faction_win_rates,
-            root_faction_matchup_factions=root_faction_matchup_factions,
-            root_faction_matchup_matrix=root_faction_matchup_matrix,
-            root_player_faction_groups=root_player_faction_groups,
-            root_faction_palette=root_faction_palette,
+            **root_module_context,
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

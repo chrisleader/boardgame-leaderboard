@@ -187,7 +187,9 @@
 
     <div class="view-tabs" role="tablist" aria-label="Leaderboard views">
       <button type="button" class="view-tab active" data-view="overall" role="tab" aria-selected="true">Overall</button>
+      {% if root_module_enabled %}
       <button type="button" class="view-tab" data-view="root" role="tab" aria-selected="false">Root</button>
+      {% endif %}
       <button type="button" class="view-tab" data-view="everdell" role="tab" aria-selected="false">Everdell</button>
       <button type="button" class="view-tab" data-view="dune" role="tab" aria-selected="false">Dune</button>
     </div>
@@ -282,6 +284,7 @@
       </div>
     </div>
 
+    {% if root_module_enabled %}
     <div class="content-view" data-view="root" role="tabpanel" hidden>
       <div class="section">
         <h2>Root</h2>
@@ -456,6 +459,7 @@
         {% endif %}
       </div>
     </div>
+    {% endif %}
     </div>
     <script>
       function parseSortValue(rawText) {
@@ -662,9 +666,11 @@
         });
       }
 
-      const availableViews = ["overall", "root", "everdell", "dune"];
       const viewTabs = Array.from(document.querySelectorAll(".view-tab"));
       const viewPanels = Array.from(document.querySelectorAll(".content-view"));
+      const availableViews = viewTabs
+        .map((tab) => (tab.dataset.view || "").trim().toLowerCase())
+        .filter((viewName, index, allViewNames) => viewName && allViewNames.indexOf(viewName) === index);
 
       function setActiveView(viewName, updateHash = true) {
         if (!availableViews.includes(viewName)) {

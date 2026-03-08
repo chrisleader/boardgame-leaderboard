@@ -38,6 +38,25 @@ python app.py
 
 5. Open [http://localhost:8080](http://localhost:8080)
 
+## Optional modules
+
+Feature modules can be enabled or disabled via `ENABLED_MODULES`.
+
+- Default: `root`
+- Example (Root disabled):
+
+```bash
+ENABLED_MODULES="" python app.py
+```
+
+- Example (Root enabled explicitly):
+
+```bash
+ENABLED_MODULES="root" python app.py
+```
+
+When `root` is disabled, Root-specific ingestion/analytics and the Root tab are hidden.
+
 ## Publish a static public page (GitHub Pages)
 
 This repo includes:
@@ -77,7 +96,7 @@ This repo includes:
 - Custom commit message: `./update_and_publish.sh "Add root game from 2026-03-08"`
 - The script will:
   - build `docs/index.html` from local `leaderboard.db`
-  - stage `screenshots/`, `docs/index.html`, and `root_faction_colors.csv`
+  - stage `docs/index.html`, `root_faction_colors.csv`, and `README.md`
   - commit and push to `main`
 
 ## Workflow
