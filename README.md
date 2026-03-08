@@ -58,13 +58,19 @@ This repo includes:
 2. Run the local app and review/save scores for the new match:
    - `python app.py`
    - open `http://localhost:8080` and save the result.
-3. Rebuild static page:
-   - `python build_static_site.py`
-4. Commit and push:
-   - `git add screenshots docs/index.html`
-   - `git commit -m "Add new game result"`
-   - `git push`
-5. GitHub Pages auto-refreshes from the workflow.
+3. Run one command to rebuild + commit + push:
+   - `./update_and_publish.sh "Add new game result"`
+4. GitHub Pages auto-refreshes from the workflow.
+
+### One-command publisher
+
+- Script: `update_and_publish.sh`
+- Default usage: `./update_and_publish.sh`
+- Custom commit message: `./update_and_publish.sh "Add root game from 2026-03-08"`
+- The script will:
+  - build `docs/index.html` from local `leaderboard.db`
+  - stage `screenshots/` and `docs/index.html`
+  - commit and push to `main`
 
 ## Workflow
 
