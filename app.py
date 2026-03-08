@@ -7,13 +7,16 @@ import json
 import os
 import re
 import sqlite3
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable, NamedTuple
+from uuid import uuid4
 
 from dateutil import parser as dt_parser
-from flask import Flask, flash, redirect, render_template, request, send_file, url_for
+from flask import Flask, flash, get_flashed_messages, redirect, render_template, request, send_file, url_for
 from PIL import Image
+from werkzeug.utils import secure_filename
 
 try:
     import pytesseract
@@ -1145,6 +1148,74 @@ def per_game_rows_map(rows: list[sqlite3.Row]) -> dict[str, list[sqlite3.Row]]:
     return grouped
 
 
+def save_uploaded_screenshot(file_storage) -> Path:
+    original_name = secure_filename(file_storage.filename or "")
+    suffix = Path(original_name).suffix.lower()
+    if suffix not in IMAGE_EXTENSIONS:
+        raise ValueError("Unsupported file type.")
+
+    uploads_dir = BASE_DIR / "screenshots" / "_uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    filename = f"{timestamp}_{uuid4().hex[:10]}{suffix}"
+    destination = uploads_dir / filename
+    file_storage.save(destination)
+    return destination
+
+
+def publish_live_stats(commit_message: str | None = None) -> tuple[bool, str]:
+    try:
+        import build_static_site
+
+        built_path = build_static_site.build_static_homepage()
+    except Exception as error:
+        return False, f"Result saved, but static build failed: {error}"
+
+    default_message = f"Refresh leaderboard static page ({datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')})"
+    message = (commit_message or default_message).strip()
+    if not message:
+        message = default_message
+
+    try:
+        subprocess.run(
+            ["git", "add", "docs/index.html"],
+            cwd=BASE_DIR,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        staged_check = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+        )
+        if staged_check.returncode == 0:
+            return True, f"Result saved. Live page already up to date ({built_path})."
+        if staged_check.returncode not in (0, 1):
+            return False, f"Result saved, but publish staging check failed: {staged_check.stderr.strip()}"
+
+        subprocess.run(
+            ["git", "commit", "-m", message],
+            cwd=BASE_DIR,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", "push", "origin", "main"],
+            cwd=BASE_DIR,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        error_text = (error.stderr or error.stdout or str(error)).strip()
+        return False, f"Result saved, but publish failed: {error_text}"
+
+    return True, f"Result saved and live stats published ({built_path})."
+
+
 def load_root_module_context(conn: sqlite3.Connection) -> dict[str, object]:
     if not module_enabled("root"):
         return {
@@ -1182,6 +1253,7 @@ def load_root_module_context(conn: sqlite3.Connection) -> dict[str, object]:
 
 @app.route("/")
 def home():
+    flash_messages = get_flashed_messages(with_categories=True)
     with db_conn() as conn:
         leaderboard = leaderboard_rows(conn)
         per_game = per_game_win_rates(conn)
@@ -1193,8 +1265,61 @@ def home():
         leaderboard=leaderboard,
         per_game=per_game,
         per_game_map=per_game_map,
+        flash_messages=flash_messages,
+        show_admin_controls=True,
         **root_module_context,
     )
+
+
+@app.route("/admin/upload", methods=["GET", "POST"])
+def admin_upload():
+    if request.method == "POST":
+        uploaded_file = request.files.get("screenshot")
+        if uploaded_file is None or not uploaded_file.filename:
+            flash("Choose a screenshot file to upload.", "error")
+            return redirect(url_for("admin_upload"))
+
+        try:
+            saved_path = save_uploaded_screenshot(uploaded_file)
+        except ValueError as error:
+            flash(str(error), "error")
+            return redirect(url_for("admin_upload"))
+        except Exception as error:
+            flash(f"Upload failed: {error}", "error")
+            return redirect(url_for("admin_upload"))
+
+        with db_conn() as conn:
+            upsert_match_from_image(conn, saved_path)
+            match_row = conn.execute(
+                "SELECT id FROM matches WHERE screenshot_path = ?",
+                (str(saved_path),),
+            ).fetchone()
+
+        if not match_row:
+            flash("Screenshot uploaded but could not create a review entry.", "error")
+            return redirect(url_for("admin_upload"))
+
+        flash("Screenshot uploaded. Review and confirm details.", "success")
+        return redirect(url_for("review", match_id=int(match_row["id"])))
+
+    with db_conn() as conn:
+        recent_matches = conn.execute(
+            """
+            SELECT
+                m.id,
+                m.created_at,
+                m.reviewed,
+                m.relevance_score,
+                m.screenshot_path,
+                g.name AS game_name
+            FROM matches m
+            LEFT JOIN games g ON g.id = m.game_id
+            ORDER BY m.id DESC
+            LIMIT 20
+            """
+        ).fetchall()
+
+    return render_template("upload.html", recent_matches=recent_matches)
 
 
 @app.route("/scan", methods=["POST"])
@@ -1242,6 +1367,7 @@ def review(match_id: int):
 
             game_name = (request.form.get("game_name") or "").strip()
             higher_is_better = request.form.get("higher_is_better", "1") == "1"
+            publish_after_save = action == "save_publish"
             played_at = safe_parse_datetime(request.form.get("played_at")) or match["played_at"]
             parsed_scores = parse_scores_text(request.form.get("scores_text") or "")
 
@@ -1291,10 +1417,33 @@ def review(match_id: int):
             if module_enabled("root") and game_name.strip().lower() == "root":
                 load_root_faction_samples(conn)
                 infer_root_factions_for_match(conn, match_id)
-            flash("Result saved.", "success")
+
+            if publish_after_save:
+                conn.commit()
+                publish_ok, publish_message = publish_live_stats()
+                flash(publish_message, "success" if publish_ok else "error")
+            else:
+                flash("Result saved.", "success")
             return redirect(url_for("home"))
 
         extracted_scores = json.loads(match["extracted_scores_json"] or "[]")
+        existing_game = conn.execute(
+            """
+            SELECT g.name, g.higher_is_better
+            FROM games g
+            JOIN matches m ON m.game_id = g.id
+            WHERE m.id = ?
+            """,
+            (match_id,),
+        ).fetchone()
+        if existing_game:
+            default_game_name = str(existing_game["name"])
+            default_higher_is_better = bool(existing_game["higher_is_better"])
+        else:
+            screenshot_path = Path(match["screenshot_path"])
+            parent_name = screenshot_path.parent.name.strip().lower()
+            default_game_name = parent_name if parent_name and not parent_name.startswith("_") else ""
+            default_higher_is_better = True
         scores_text = "\n".join(
             f"{canonicalize_player_name(row['player_name'])},{row['score'] if row['score'] is not None else 'NA'}"
             for row in extracted_scores
@@ -1305,6 +1454,8 @@ def review(match_id: int):
             match=match,
             scores_text=scores_text,
             ocr_available=pytesseract is not None,
+            default_game_name=default_game_name,
+            default_higher_is_better=default_higher_is_better,
         )
 
 

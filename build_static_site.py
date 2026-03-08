@@ -26,6 +26,8 @@ def build_static_homepage() -> Path:
             leaderboard=leaderboard,
             per_game=per_game,
             per_game_map=per_game_map,
+            flash_messages=[],
+            show_admin_controls=False,
             **root_module_context,
         )
 

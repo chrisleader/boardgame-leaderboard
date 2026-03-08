@@ -12,11 +12,22 @@
       code { background: #f7f7f7; padding: 2px 4px; border-radius: 4px; }
       img { max-width: 100%; height: auto; }
       pre { white-space: pre-wrap; background: #f7f7f7; border-radius: 6px; padding: 8px; max-height: 360px; overflow: auto; }
+      .flash { border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #d1d5db; }
+      .flash-success { background: #ecfdf3; border-color: #a7f3d0; color: #065f46; }
+      .flash-error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
     </style>
   </head>
   <body>
-    <p><a href="{{ url_for('home') }}">← Back</a></p>
+    <p><a href="{{ url_for('home') }}">← Leaderboard</a> · <a href="{{ url_for('admin_upload') }}">Upload new screenshot</a></p>
     <h1>Review screenshot #{{ match['id'] }}</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash flash-{{ 'success' if category == 'success' else 'error' }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
     <div class="grid">
       <div class="card">
@@ -28,12 +39,12 @@
       <div class="card">
         <form method="post">
           <label>Game name</label>
-          <input type="text" name="game_name" placeholder="e.g. Catan" required />
+          <input type="text" name="game_name" placeholder="e.g. Catan" value="{{ default_game_name }}" required />
 
           <label>Winner rule</label>
           <select name="higher_is_better">
-            <option value="1">Higher score wins</option>
-            <option value="0">Lower score wins</option>
+            <option value="1"{% if default_higher_is_better %} selected{% endif %}>Higher score wins</option>
+            <option value="0"{% if not default_higher_is_better %} selected{% endif %}>Lower score wins</option>
           </select>
 
           <label>Played at (optional)</label>
@@ -43,8 +54,11 @@
           <p>Use <code>Player,Score</code> or <code>Player,NA</code> for non-numeric dominance/coalition markers.</p>
           <textarea name="scores_text" rows="10">{{ scores_text }}</textarea>
 
-          <button type="submit" name="action" value="save">Save result</button>
-          <button type="submit" name="action" value="ignore">Ignore screenshot</button>
+          <div class="actions">
+            <button type="submit" name="action" value="save">Save result</button>
+            <button type="submit" name="action" value="save_publish">Save + Publish live stats</button>
+            <button type="submit" name="action" value="ignore">Ignore screenshot</button>
+          </div>
         </form>
       </div>
     </div>

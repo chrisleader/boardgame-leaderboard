@@ -21,6 +21,11 @@
       h2 { margin: 0 0 8px; font-size: clamp(1.15rem, 3.8vw, 1.55rem); }
       h3 { margin: 10px 0 8px; font-size: 1rem; }
       .section { margin-top: 20px; }
+      .top-links { margin: 0 0 10px; }
+      .top-links a { color: #1f2937; }
+      .flash { border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #d1d5db; }
+      .flash-success { background: #ecfdf3; border-color: #a7f3d0; color: #065f46; }
+      .flash-error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
       .view-tabs {
         display: flex;
         gap: 8px;
@@ -181,6 +186,14 @@
   <body>
     <div class="container">
     <h1>Board Game Leaderboard</h1>
+    {% if show_admin_controls %}
+    <p class="top-links"><a href="{{ url_for('admin_upload') }}">Upload new screenshot</a></p>
+    {% endif %}
+    {% if flash_messages %}
+    {% for category, message in flash_messages %}
+    <div class="flash flash-{{ 'success' if category == 'success' else 'error' }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
     {% set dune_rows = per_game_map.get('dune', []) %}
     {% set everdell_rows = per_game_map.get('everdell', []) %}
     {% set root_rows = per_game_map.get('root', []) %}

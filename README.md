@@ -103,9 +103,13 @@ Current `.gitignore` is configured to exclude local/private game assets.
 
 ### Ongoing update flow
 
-1. Add new screenshot(s) locally
-2. Run app and review/save matches
-3. Rebuild and publish:
+1. Start app: `python app.py`
+2. Open admin upload: [http://localhost:8080/admin/upload](http://localhost:8080/admin/upload)
+3. Upload one screenshot
+4. Review/edit detected game + scores
+5. Click **Save + Publish live stats** to rebuild and push static output
+
+Alternative CLI workflow:
 
 ```bash
 ./update_and_publish.sh "Add new game result"
