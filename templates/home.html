@@ -84,6 +84,16 @@
         z-index: 4;
         background: #f5f5f5;
       }
+      .matrix-metric-select {
+        width: 100%;
+        min-width: 130px;
+        font: inherit;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 4px 6px;
+        background: #fff;
+        color: #111827;
+      }
       .matrix-hint {
         margin: 6px 0 10px;
         color: #4b5563;
@@ -230,13 +240,18 @@
       </div>
 
       <h3>Win rate vs each other faction</h3>
-      <p class="matrix-hint"><strong>Rows = faction being measured.</strong> Columns = opponent faction. Each cell shows the row faction’s win rate vs the column faction.</p>
+      <p class="matrix-hint">Rows = faction being measured. Columns = opponent faction.</p>
       <div class="table-wrap">
       {% if root_faction_matchup_matrix %}
       <table class="matrix-table">
         <thead>
           <tr>
-            <th aria-label="Faction matchup matrix"></th>
+            <th>
+              <select id="matrix-metric-select" class="matrix-metric-select" aria-label="Matrix metric">
+                <option value="win_rate" selected>Win rate</option>
+                <option value="wins">Number of wins</option>
+              </select>
+            </th>
             {% for column_faction_name in root_faction_matchup_factions %}
             {% set column_palette = root_faction_palette.get(column_faction_name) %}
             <th class="faction-cell"{% if column_palette %} style="background:#{{ column_palette['hex'] }}; color:{{ column_palette['text'] }};"{% endif %}>{{ column_faction_name }}</th>
@@ -250,7 +265,7 @@
             <td class="faction-cell"{% if faction_palette %} style="background:#{{ faction_palette['hex'] }}; color:{{ faction_palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
             {% for cell in row['cells'] %}
             {% set opponent_faction_name = root_faction_matchup_factions[loop.index0] %}
-            <td class="{% if cell['is_diagonal'] %}matrix-diagonal{% elif cell['win_rate'] is none %}matrix-empty{% endif %}"{% if cell['win_rate'] is not none %} style="background:{{ cell['background'] }}; color:{{ cell['text'] }};" title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}"{% endif %}>
+            <td class="{% if cell['win_rate'] is not none %}matchup-value-cell {% endif %}{% if cell['is_diagonal'] %}matrix-diagonal{% elif cell['win_rate'] is none %}matrix-empty{% endif %}"{% if cell['win_rate'] is not none %} data-win-rate="{{ '%.1f%%'|format(cell['win_rate'] * 100) }}" data-wins="{{ cell['wins'] }}" data-win-rate-title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}" data-wins-title="{{ row['faction_name'] }} wins vs {{ opponent_faction_name }}: {{ cell['wins'] }}" data-win-bg="{{ cell['background'] }}" data-win-text="{{ cell['text'] }}" style="background:{{ cell['background'] }}; color:{{ cell['text'] }};" title="{{ row['faction_name'] }} win rate vs {{ opponent_faction_name }}: {{ '%.1f%%'|format(cell['win_rate'] * 100) }}"{% endif %}>
               {% if cell['win_rate'] is not none %}
               {{ '%.1f%%'|format(cell['win_rate'] * 100) }}
               {% else %}
@@ -391,6 +406,41 @@
         for (const row of lockedRows) {
           tbody.appendChild(row);
         }
+      }
+
+      function applyMatchupMetric(metric) {
+        const table = document.querySelector("table.matrix-table");
+        if (!table) {
+          return;
+        }
+        table.querySelectorAll("td.matchup-value-cell").forEach((cell) => {
+          if (metric === "wins") {
+            cell.textContent = cell.dataset.wins || "";
+            cell.removeAttribute("style");
+            cell.title = cell.dataset.winsTitle || "";
+            return;
+          }
+          cell.textContent = cell.dataset.winRate || "";
+          if (cell.dataset.winBg) {
+            cell.style.background = cell.dataset.winBg;
+          }
+          if (cell.dataset.winText) {
+            cell.style.color = cell.dataset.winText;
+          }
+          cell.title = cell.dataset.winRateTitle || "";
+        });
+      }
+
+      const matrixMetricSelect = document.getElementById("matrix-metric-select");
+      if (matrixMetricSelect) {
+        applyMatchupMetric(matrixMetricSelect.value);
+        matrixMetricSelect.addEventListener("change", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLSelectElement)) {
+            return;
+          }
+          applyMatchupMetric(target.value);
+        });
       }
 
       document.querySelectorAll("table").forEach((table) => {

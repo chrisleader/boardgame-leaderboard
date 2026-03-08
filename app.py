@@ -1029,6 +1029,7 @@ def build_root_faction_matchup_matrix(
 ) -> tuple[list[str], list[dict[str, object]]]:
     factions: set[str] = set()
     win_rate_map: dict[tuple[str, str], float] = {}
+    wins_map: dict[tuple[str, str], int] = {}
 
     for row in rows:
         faction_name = str(row["faction_name"])
@@ -1036,6 +1037,7 @@ def build_root_faction_matchup_matrix(
         factions.add(faction_name)
         factions.add(opponent_faction_name)
         win_rate_map[(faction_name, opponent_faction_name)] = float(row["win_rate"])
+        wins_map[(faction_name, opponent_faction_name)] = int(row["wins"])
 
     ordered_factions = sorted(factions)
     matrix_rows: list[dict[str, object]] = []
@@ -1055,6 +1057,7 @@ def build_root_faction_matchup_matrix(
                 cells.append(
                     {
                         "win_rate": None,
+                        "wins": None,
                         "is_diagonal": False,
                     }
                 )
@@ -1064,6 +1067,7 @@ def build_root_faction_matchup_matrix(
             cells.append(
                 {
                     "win_rate": win_rate,
+                    "wins": wins_map[(faction_name, opponent_faction_name)],
                     "is_diagonal": False,
                     "background": style["background"],
                     "text": style["text"],

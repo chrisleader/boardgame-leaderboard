@@ -84,6 +84,16 @@
         z-index: 4;
         background: #f5f5f5;
       }
+      .matrix-metric-select {
+        width: 100%;
+        min-width: 130px;
+        font: inherit;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 4px 6px;
+        background: #fff;
+        color: #111827;
+      }
       .matrix-hint {
         margin: 6px 0 10px;
         color: #4b5563;
@@ -497,13 +507,18 @@
       </div>
 
       <h3>Win rate vs each other faction</h3>
-      <p class="matrix-hint"><strong>Rows = faction being measured.</strong> Columns = opponent faction. Each cell shows the row faction’s win rate vs the column faction.</p>
+      <p class="matrix-hint">Rows = faction being measured. Columns = opponent faction.</p>
       <div class="table-wrap">
       
       <table class="matrix-table">
         <thead>
           <tr>
-            <th aria-label="Faction matchup matrix"></th>
+            <th>
+              <select id="matrix-metric-select" class="matrix-metric-select" aria-label="Matrix metric">
+                <option value="win_rate" selected>Win rate</option>
+                <option value="wins">Number of wins</option>
+              </select>
+            </th>
             
             
             <th class="faction-cell" style="background:#9673B5; color:#111827;">Corvid Conspiracy</th>
@@ -551,63 +566,63 @@
             </td>
             
             
-            <td class="" style="background:#F1E2BC; color:#111827;" title="Corvid Conspiracy win rate vs Eyrie Dynasties: 36.4%">
+            <td class="matchup-value-cell " data-win-rate="36.4%" data-wins="4" data-win-rate-title="Corvid Conspiracy win rate vs Eyrie Dynasties: 36.4%" data-wins-title="Corvid Conspiracy wins vs Eyrie Dynasties: 4" data-win-bg="#F1E2BC" data-win-text="#111827" style="background:#F1E2BC; color:#111827;" title="Corvid Conspiracy win rate vs Eyrie Dynasties: 36.4%">
               
               36.4%
               
             </td>
             
             
-            <td class="" style="background:#F1EBBC; color:#111827;" title="Corvid Conspiracy win rate vs Keepers in Iron: 44.4%">
+            <td class="matchup-value-cell " data-win-rate="44.4%" data-wins="4" data-win-rate-title="Corvid Conspiracy win rate vs Keepers in Iron: 44.4%" data-wins-title="Corvid Conspiracy wins vs Keepers in Iron: 4" data-win-bg="#F1EBBC" data-win-text="#111827" style="background:#F1EBBC; color:#111827;" title="Corvid Conspiracy win rate vs Keepers in Iron: 44.4%">
               
               44.4%
               
             </td>
             
             
-            <td class="" style="background:#E6F1BC; color:#111827;" title="Corvid Conspiracy win rate vs Lizard Cult: 60.0%">
+            <td class="matchup-value-cell " data-win-rate="60.0%" data-wins="3" data-win-rate-title="Corvid Conspiracy win rate vs Lizard Cult: 60.0%" data-wins-title="Corvid Conspiracy wins vs Lizard Cult: 3" data-win-bg="#E6F1BC" data-win-text="#111827" style="background:#E6F1BC; color:#111827;" title="Corvid Conspiracy win rate vs Lizard Cult: 60.0%">
               
               60.0%
               
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Corvid Conspiracy win rate vs Lord of the Hundreds: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="1" data-win-rate-title="Corvid Conspiracy win rate vs Lord of the Hundreds: 16.7%" data-wins-title="Corvid Conspiracy wins vs Lord of the Hundreds: 1" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Corvid Conspiracy win rate vs Lord of the Hundreds: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Corvid Conspiracy win rate vs Marquise de Cat: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="3" data-win-rate-title="Corvid Conspiracy win rate vs Marquise de Cat: 25.0%" data-wins-title="Corvid Conspiracy wins vs Marquise de Cat: 3" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Corvid Conspiracy win rate vs Marquise de Cat: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DABC; color:#111827;" title="Corvid Conspiracy win rate vs Riverfolk Company: 28.6%">
+            <td class="matchup-value-cell " data-win-rate="28.6%" data-wins="2" data-win-rate-title="Corvid Conspiracy win rate vs Riverfolk Company: 28.6%" data-wins-title="Corvid Conspiracy wins vs Riverfolk Company: 2" data-win-bg="#F1DABC" data-win-text="#111827" style="background:#F1DABC; color:#111827;" title="Corvid Conspiracy win rate vs Riverfolk Company: 28.6%">
               
               28.6%
               
             </td>
             
             
-            <td class="" style="background:#F1F1BC; color:#111827;" title="Corvid Conspiracy win rate vs Underground Duchy: 50.0%">
+            <td class="matchup-value-cell " data-win-rate="50.0%" data-wins="4" data-win-rate-title="Corvid Conspiracy win rate vs Underground Duchy: 50.0%" data-wins-title="Corvid Conspiracy wins vs Underground Duchy: 4" data-win-bg="#F1F1BC" data-win-text="#111827" style="background:#F1F1BC; color:#111827;" title="Corvid Conspiracy win rate vs Underground Duchy: 50.0%">
               
               50.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E9BC; color:#111827;" title="Corvid Conspiracy win rate vs Vagabond: 42.9%">
+            <td class="matchup-value-cell " data-win-rate="42.9%" data-wins="3" data-win-rate-title="Corvid Conspiracy win rate vs Vagabond: 42.9%" data-wins-title="Corvid Conspiracy wins vs Vagabond: 3" data-win-bg="#F1E9BC" data-win-text="#111827" style="background:#F1E9BC; color:#111827;" title="Corvid Conspiracy win rate vs Vagabond: 42.9%">
               
               42.9%
               
             </td>
             
             
-            <td class="" style="background:#F1DCBC; color:#111827;" title="Corvid Conspiracy win rate vs Woodland Alliance: 30.0%">
+            <td class="matchup-value-cell " data-win-rate="30.0%" data-wins="3" data-win-rate-title="Corvid Conspiracy win rate vs Woodland Alliance: 30.0%" data-wins-title="Corvid Conspiracy wins vs Woodland Alliance: 3" data-win-bg="#F1DCBC" data-win-text="#111827" style="background:#F1DCBC; color:#111827;" title="Corvid Conspiracy win rate vs Woodland Alliance: 30.0%">
               
               30.0%
               
@@ -620,7 +635,7 @@
             <td class="faction-cell" style="background:#405E8D; color:#FFFFFF;">Eyrie Dynasties</td>
             
             
-            <td class="" style="background:#F1C5BC; color:#111827;" title="Eyrie Dynasties win rate vs Corvid Conspiracy: 9.1%">
+            <td class="matchup-value-cell " data-win-rate="9.1%" data-wins="1" data-win-rate-title="Eyrie Dynasties win rate vs Corvid Conspiracy: 9.1%" data-wins-title="Eyrie Dynasties wins vs Corvid Conspiracy: 1" data-win-bg="#F1C5BC" data-win-text="#111827" style="background:#F1C5BC; color:#111827;" title="Eyrie Dynasties win rate vs Corvid Conspiracy: 9.1%">
               
               9.1%
               
@@ -634,56 +649,56 @@
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Eyrie Dynasties win rate vs Keepers in Iron: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="2" data-win-rate-title="Eyrie Dynasties win rate vs Keepers in Iron: 25.0%" data-wins-title="Eyrie Dynasties wins vs Keepers in Iron: 2" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Eyrie Dynasties win rate vs Keepers in Iron: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1F1BC; color:#111827;" title="Eyrie Dynasties win rate vs Lizard Cult: 50.0%">
+            <td class="matchup-value-cell " data-win-rate="50.0%" data-wins="5" data-win-rate-title="Eyrie Dynasties win rate vs Lizard Cult: 50.0%" data-wins-title="Eyrie Dynasties wins vs Lizard Cult: 5" data-win-bg="#F1F1BC" data-win-text="#111827" style="background:#F1F1BC; color:#111827;" title="Eyrie Dynasties win rate vs Lizard Cult: 50.0%">
               
               50.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D1BC; color:#111827;" title="Eyrie Dynasties win rate vs Lord of the Hundreds: 20.0%">
+            <td class="matchup-value-cell " data-win-rate="20.0%" data-wins="2" data-win-rate-title="Eyrie Dynasties win rate vs Lord of the Hundreds: 20.0%" data-wins-title="Eyrie Dynasties wins vs Lord of the Hundreds: 2" data-win-bg="#F1D1BC" data-win-text="#111827" style="background:#F1D1BC; color:#111827;" title="Eyrie Dynasties win rate vs Lord of the Hundreds: 20.0%">
               
               20.0%
               
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Eyrie Dynasties win rate vs Marquise de Cat: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="2" data-win-rate-title="Eyrie Dynasties win rate vs Marquise de Cat: 16.7%" data-wins-title="Eyrie Dynasties wins vs Marquise de Cat: 2" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Eyrie Dynasties win rate vs Marquise de Cat: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#E9F1BC; color:#111827;" title="Eyrie Dynasties win rate vs Riverfolk Company: 57.1%">
+            <td class="matchup-value-cell " data-win-rate="57.1%" data-wins="4" data-win-rate-title="Eyrie Dynasties win rate vs Riverfolk Company: 57.1%" data-wins-title="Eyrie Dynasties wins vs Riverfolk Company: 4" data-win-bg="#E9F1BC" data-win-text="#111827" style="background:#E9F1BC; color:#111827;" title="Eyrie Dynasties win rate vs Riverfolk Company: 57.1%">
               
               57.1%
               
             </td>
             
             
-            <td class="" style="background:#F1DFBC; color:#111827;" title="Eyrie Dynasties win rate vs Underground Duchy: 33.3%">
+            <td class="matchup-value-cell " data-win-rate="33.3%" data-wins="2" data-win-rate-title="Eyrie Dynasties win rate vs Underground Duchy: 33.3%" data-wins-title="Eyrie Dynasties wins vs Underground Duchy: 2" data-win-bg="#F1DFBC" data-win-text="#111827" style="background:#F1DFBC; color:#111827;" title="Eyrie Dynasties win rate vs Underground Duchy: 33.3%">
               
               33.3%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Eyrie Dynasties win rate vs Vagabond: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="4" data-win-rate-title="Eyrie Dynasties win rate vs Vagabond: 25.0%" data-wins-title="Eyrie Dynasties wins vs Vagabond: 4" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Eyrie Dynasties win rate vs Vagabond: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D9BC; color:#111827;" title="Eyrie Dynasties win rate vs Woodland Alliance: 27.8%">
+            <td class="matchup-value-cell " data-win-rate="27.8%" data-wins="5" data-win-rate-title="Eyrie Dynasties win rate vs Woodland Alliance: 27.8%" data-wins-title="Eyrie Dynasties wins vs Woodland Alliance: 5" data-win-bg="#F1D9BC" data-win-text="#111827" style="background:#F1D9BC; color:#111827;" title="Eyrie Dynasties win rate vs Woodland Alliance: 27.8%">
               
               27.8%
               
@@ -696,14 +711,14 @@
             <td class="faction-cell" style="background:#567D9A; color:#FFFFFF;">Keepers in Iron</td>
             
             
-            <td class="" style="background:#F1C7BC; color:#111827;" title="Keepers in Iron win rate vs Corvid Conspiracy: 11.1%">
+            <td class="matchup-value-cell " data-win-rate="11.1%" data-wins="1" data-win-rate-title="Keepers in Iron win rate vs Corvid Conspiracy: 11.1%" data-wins-title="Keepers in Iron wins vs Corvid Conspiracy: 1" data-win-bg="#F1C7BC" data-win-text="#111827" style="background:#F1C7BC; color:#111827;" title="Keepers in Iron win rate vs Corvid Conspiracy: 11.1%">
               
               11.1%
               
             </td>
             
             
-            <td class="" style="background:#F1C9BC; color:#111827;" title="Keepers in Iron win rate vs Eyrie Dynasties: 12.5%">
+            <td class="matchup-value-cell " data-win-rate="12.5%" data-wins="1" data-win-rate-title="Keepers in Iron win rate vs Eyrie Dynasties: 12.5%" data-wins-title="Keepers in Iron wins vs Eyrie Dynasties: 1" data-win-bg="#F1C9BC" data-win-text="#111827" style="background:#F1C9BC; color:#111827;" title="Keepers in Iron win rate vs Eyrie Dynasties: 12.5%">
               
               12.5%
               
@@ -717,49 +732,49 @@
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Keepers in Iron win rate vs Lizard Cult: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Keepers in Iron win rate vs Lizard Cult: 0.0%" data-wins-title="Keepers in Iron wins vs Lizard Cult: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Keepers in Iron win rate vs Lizard Cult: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D1BC; color:#111827;" title="Keepers in Iron win rate vs Lord of the Hundreds: 20.0%">
+            <td class="matchup-value-cell " data-win-rate="20.0%" data-wins="2" data-win-rate-title="Keepers in Iron win rate vs Lord of the Hundreds: 20.0%" data-wins-title="Keepers in Iron wins vs Lord of the Hundreds: 2" data-win-bg="#F1D1BC" data-win-text="#111827" style="background:#F1D1BC; color:#111827;" title="Keepers in Iron win rate vs Lord of the Hundreds: 20.0%">
               
               20.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DFBC; color:#111827;" title="Keepers in Iron win rate vs Marquise de Cat: 33.3%">
+            <td class="matchup-value-cell " data-win-rate="33.3%" data-wins="1" data-win-rate-title="Keepers in Iron win rate vs Marquise de Cat: 33.3%" data-wins-title="Keepers in Iron wins vs Marquise de Cat: 1" data-win-bg="#F1DFBC" data-win-text="#111827" style="background:#F1DFBC; color:#111827;" title="Keepers in Iron win rate vs Marquise de Cat: 33.3%">
               
               33.3%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Keepers in Iron win rate vs Riverfolk Company: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="1" data-win-rate-title="Keepers in Iron win rate vs Riverfolk Company: 25.0%" data-wins-title="Keepers in Iron wins vs Riverfolk Company: 1" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Keepers in Iron win rate vs Riverfolk Company: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D3BC; color:#111827;" title="Keepers in Iron win rate vs Underground Duchy: 22.2%">
+            <td class="matchup-value-cell " data-win-rate="22.2%" data-wins="2" data-win-rate-title="Keepers in Iron win rate vs Underground Duchy: 22.2%" data-wins-title="Keepers in Iron wins vs Underground Duchy: 2" data-win-bg="#F1D3BC" data-win-text="#111827" style="background:#F1D3BC; color:#111827;" title="Keepers in Iron win rate vs Underground Duchy: 22.2%">
               
               22.2%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Keepers in Iron win rate vs Vagabond: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Keepers in Iron win rate vs Vagabond: 0.0%" data-wins-title="Keepers in Iron wins vs Vagabond: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Keepers in Iron win rate vs Vagabond: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1CBBC; color:#111827;" title="Keepers in Iron win rate vs Woodland Alliance: 14.3%">
+            <td class="matchup-value-cell " data-win-rate="14.3%" data-wins="1" data-win-rate-title="Keepers in Iron win rate vs Woodland Alliance: 14.3%" data-wins-title="Keepers in Iron wins vs Woodland Alliance: 1" data-win-bg="#F1CBBC" data-win-text="#111827" style="background:#F1CBBC; color:#111827;" title="Keepers in Iron win rate vs Woodland Alliance: 14.3%">
               
               14.3%
               
@@ -772,21 +787,21 @@
             <td class="faction-cell" style="background:#949739; color:#111827;">Lizard Cult</td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Corvid Conspiracy: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Lizard Cult win rate vs Corvid Conspiracy: 0.0%" data-wins-title="Lizard Cult wins vs Corvid Conspiracy: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Corvid Conspiracy: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1C6BC; color:#111827;" title="Lizard Cult win rate vs Eyrie Dynasties: 10.0%">
+            <td class="matchup-value-cell " data-win-rate="10.0%" data-wins="1" data-win-rate-title="Lizard Cult win rate vs Eyrie Dynasties: 10.0%" data-wins-title="Lizard Cult wins vs Eyrie Dynasties: 1" data-win-bg="#F1C6BC" data-win-text="#111827" style="background:#F1C6BC; color:#111827;" title="Lizard Cult win rate vs Eyrie Dynasties: 10.0%">
               
               10.0%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Keepers in Iron: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Lizard Cult win rate vs Keepers in Iron: 0.0%" data-wins-title="Lizard Cult wins vs Keepers in Iron: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Keepers in Iron: 0.0%">
               
               0.0%
               
@@ -800,42 +815,42 @@
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Lord of the Hundreds: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Lizard Cult win rate vs Lord of the Hundreds: 0.0%" data-wins-title="Lizard Cult wins vs Lord of the Hundreds: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Lord of the Hundreds: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Marquise de Cat: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Lizard Cult win rate vs Marquise de Cat: 0.0%" data-wins-title="Lizard Cult wins vs Marquise de Cat: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Lizard Cult win rate vs Marquise de Cat: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Lizard Cult win rate vs Riverfolk Company: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="1" data-win-rate-title="Lizard Cult win rate vs Riverfolk Company: 16.7%" data-wins-title="Lizard Cult wins vs Riverfolk Company: 1" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Lizard Cult win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1C9BC; color:#111827;" title="Lizard Cult win rate vs Underground Duchy: 12.5%">
+            <td class="matchup-value-cell " data-win-rate="12.5%" data-wins="1" data-win-rate-title="Lizard Cult win rate vs Underground Duchy: 12.5%" data-wins-title="Lizard Cult wins vs Underground Duchy: 1" data-win-bg="#F1C9BC" data-win-text="#111827" style="background:#F1C9BC; color:#111827;" title="Lizard Cult win rate vs Underground Duchy: 12.5%">
               
               12.5%
               
             </td>
             
             
-            <td class="" style="background:#F1C9BC; color:#111827;" title="Lizard Cult win rate vs Vagabond: 12.5%">
+            <td class="matchup-value-cell " data-win-rate="12.5%" data-wins="1" data-win-rate-title="Lizard Cult win rate vs Vagabond: 12.5%" data-wins-title="Lizard Cult wins vs Vagabond: 1" data-win-bg="#F1C9BC" data-win-text="#111827" style="background:#F1C9BC; color:#111827;" title="Lizard Cult win rate vs Vagabond: 12.5%">
               
               12.5%
               
             </td>
             
             
-            <td class="" style="background:#F1D1BC; color:#111827;" title="Lizard Cult win rate vs Woodland Alliance: 20.0%">
+            <td class="matchup-value-cell " data-win-rate="20.0%" data-wins="2" data-win-rate-title="Lizard Cult win rate vs Woodland Alliance: 20.0%" data-wins-title="Lizard Cult wins vs Woodland Alliance: 2" data-win-bg="#F1D1BC" data-win-text="#111827" style="background:#F1D1BC; color:#111827;" title="Lizard Cult win rate vs Woodland Alliance: 20.0%">
               
               20.0%
               
@@ -848,28 +863,28 @@
             <td class="faction-cell" style="background:#AE0719; color:#FFFFFF;">Lord of the Hundreds</td>
             
             
-            <td class="" style="background:#F1F1BC; color:#111827;" title="Lord of the Hundreds win rate vs Corvid Conspiracy: 50.0%">
+            <td class="matchup-value-cell " data-win-rate="50.0%" data-wins="3" data-win-rate-title="Lord of the Hundreds win rate vs Corvid Conspiracy: 50.0%" data-wins-title="Lord of the Hundreds wins vs Corvid Conspiracy: 3" data-win-bg="#F1F1BC" data-win-text="#111827" style="background:#F1F1BC; color:#111827;" title="Lord of the Hundreds win rate vs Corvid Conspiracy: 50.0%">
               
               50.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Eyrie Dynasties: 40.0%">
+            <td class="matchup-value-cell " data-win-rate="40.0%" data-wins="4" data-win-rate-title="Lord of the Hundreds win rate vs Eyrie Dynasties: 40.0%" data-wins-title="Lord of the Hundreds wins vs Eyrie Dynasties: 4" data-win-bg="#F1E6BC" data-win-text="#111827" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Eyrie Dynasties: 40.0%">
               
               40.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Keepers in Iron: 40.0%">
+            <td class="matchup-value-cell " data-win-rate="40.0%" data-wins="4" data-win-rate-title="Lord of the Hundreds win rate vs Keepers in Iron: 40.0%" data-wins-title="Lord of the Hundreds wins vs Keepers in Iron: 4" data-win-bg="#F1E6BC" data-win-text="#111827" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Keepers in Iron: 40.0%">
               
               40.0%
               
             </td>
             
             
-            <td class="" style="background:#DFF1BC; color:#111827;" title="Lord of the Hundreds win rate vs Lizard Cult: 66.7%">
+            <td class="matchup-value-cell " data-win-rate="66.7%" data-wins="4" data-win-rate-title="Lord of the Hundreds win rate vs Lizard Cult: 66.7%" data-wins-title="Lord of the Hundreds wins vs Lizard Cult: 4" data-win-bg="#DFF1BC" data-win-text="#111827" style="background:#DFF1BC; color:#111827;" title="Lord of the Hundreds win rate vs Lizard Cult: 66.7%">
               
               66.7%
               
@@ -883,35 +898,35 @@
             </td>
             
             
-            <td class="" style="background:#F1F1BC; color:#111827;" title="Lord of the Hundreds win rate vs Marquise de Cat: 50.0%">
+            <td class="matchup-value-cell " data-win-rate="50.0%" data-wins="1" data-win-rate-title="Lord of the Hundreds win rate vs Marquise de Cat: 50.0%" data-wins-title="Lord of the Hundreds wins vs Marquise de Cat: 1" data-win-bg="#F1F1BC" data-win-text="#111827" style="background:#F1F1BC; color:#111827;" title="Lord of the Hundreds win rate vs Marquise de Cat: 50.0%">
               
               50.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Lord of the Hundreds win rate vs Riverfolk Company: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="1" data-win-rate-title="Lord of the Hundreds win rate vs Riverfolk Company: 25.0%" data-wins-title="Lord of the Hundreds wins vs Riverfolk Company: 1" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Lord of the Hundreds win rate vs Riverfolk Company: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Lord of the Hundreds win rate vs Underground Duchy: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Lord of the Hundreds win rate vs Underground Duchy: 0.0%" data-wins-title="Lord of the Hundreds wins vs Underground Duchy: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Lord of the Hundreds win rate vs Underground Duchy: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E9BC; color:#111827;" title="Lord of the Hundreds win rate vs Vagabond: 42.9%">
+            <td class="matchup-value-cell " data-win-rate="42.9%" data-wins="3" data-win-rate-title="Lord of the Hundreds win rate vs Vagabond: 42.9%" data-wins-title="Lord of the Hundreds wins vs Vagabond: 3" data-win-bg="#F1E9BC" data-win-text="#111827" style="background:#F1E9BC; color:#111827;" title="Lord of the Hundreds win rate vs Vagabond: 42.9%">
               
               42.9%
               
             </td>
             
             
-            <td class="" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Woodland Alliance: 40.0%">
+            <td class="matchup-value-cell " data-win-rate="40.0%" data-wins="4" data-win-rate-title="Lord of the Hundreds win rate vs Woodland Alliance: 40.0%" data-wins-title="Lord of the Hundreds wins vs Woodland Alliance: 4" data-win-bg="#F1E6BC" data-win-text="#111827" style="background:#F1E6BC; color:#111827;" title="Lord of the Hundreds win rate vs Woodland Alliance: 40.0%">
               
               40.0%
               
@@ -924,35 +939,35 @@
             <td class="faction-cell" style="background:#F08024; color:#111827;">Marquise de Cat</td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Marquise de Cat win rate vs Corvid Conspiracy: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="2" data-win-rate-title="Marquise de Cat win rate vs Corvid Conspiracy: 16.7%" data-wins-title="Marquise de Cat wins vs Corvid Conspiracy: 2" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Marquise de Cat win rate vs Corvid Conspiracy: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1E8BC; color:#111827;" title="Marquise de Cat win rate vs Eyrie Dynasties: 41.7%">
+            <td class="matchup-value-cell " data-win-rate="41.7%" data-wins="5" data-win-rate-title="Marquise de Cat win rate vs Eyrie Dynasties: 41.7%" data-wins-title="Marquise de Cat wins vs Eyrie Dynasties: 5" data-win-bg="#F1E8BC" data-win-text="#111827" style="background:#F1E8BC; color:#111827;" title="Marquise de Cat win rate vs Eyrie Dynasties: 41.7%">
               
               41.7%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Keepers in Iron: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Marquise de Cat win rate vs Keepers in Iron: 0.0%" data-wins-title="Marquise de Cat wins vs Keepers in Iron: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Keepers in Iron: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Lizard Cult: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Marquise de Cat win rate vs Lizard Cult: 0.0%" data-wins-title="Marquise de Cat wins vs Lizard Cult: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Lizard Cult: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Lord of the Hundreds: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Marquise de Cat win rate vs Lord of the Hundreds: 0.0%" data-wins-title="Marquise de Cat wins vs Lord of the Hundreds: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Lord of the Hundreds: 0.0%">
               
               0.0%
               
@@ -966,28 +981,28 @@
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Marquise de Cat win rate vs Riverfolk Company: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="1" data-win-rate-title="Marquise de Cat win rate vs Riverfolk Company: 16.7%" data-wins-title="Marquise de Cat wins vs Riverfolk Company: 1" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Marquise de Cat win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Underground Duchy: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Marquise de Cat win rate vs Underground Duchy: 0.0%" data-wins-title="Marquise de Cat wins vs Underground Duchy: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Marquise de Cat win rate vs Underground Duchy: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Marquise de Cat win rate vs Vagabond: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="3" data-win-rate-title="Marquise de Cat win rate vs Vagabond: 25.0%" data-wins-title="Marquise de Cat wins vs Vagabond: 3" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Marquise de Cat win rate vs Vagabond: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DABC; color:#111827;" title="Marquise de Cat win rate vs Woodland Alliance: 28.6%">
+            <td class="matchup-value-cell " data-win-rate="28.6%" data-wins="4" data-win-rate-title="Marquise de Cat win rate vs Woodland Alliance: 28.6%" data-wins-title="Marquise de Cat wins vs Woodland Alliance: 4" data-win-bg="#F1DABC" data-win-text="#111827" style="background:#F1DABC; color:#111827;" title="Marquise de Cat win rate vs Woodland Alliance: 28.6%">
               
               28.6%
               
@@ -1000,42 +1015,42 @@
             <td class="faction-cell" style="background:#48A29C; color:#111827;">Riverfolk Company</td>
             
             
-            <td class="" style="background:#F1CBBC; color:#111827;" title="Riverfolk Company win rate vs Corvid Conspiracy: 14.3%">
+            <td class="matchup-value-cell " data-win-rate="14.3%" data-wins="1" data-win-rate-title="Riverfolk Company win rate vs Corvid Conspiracy: 14.3%" data-wins-title="Riverfolk Company wins vs Corvid Conspiracy: 1" data-win-bg="#F1CBBC" data-win-text="#111827" style="background:#F1CBBC; color:#111827;" title="Riverfolk Company win rate vs Corvid Conspiracy: 14.3%">
               
               14.3%
               
             </td>
             
             
-            <td class="" style="background:#F1CBBC; color:#111827;" title="Riverfolk Company win rate vs Eyrie Dynasties: 14.3%">
+            <td class="matchup-value-cell " data-win-rate="14.3%" data-wins="1" data-win-rate-title="Riverfolk Company win rate vs Eyrie Dynasties: 14.3%" data-wins-title="Riverfolk Company wins vs Eyrie Dynasties: 1" data-win-bg="#F1CBBC" data-win-text="#111827" style="background:#F1CBBC; color:#111827;" title="Riverfolk Company win rate vs Eyrie Dynasties: 14.3%">
               
               14.3%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Keepers in Iron: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Riverfolk Company win rate vs Keepers in Iron: 0.0%" data-wins-title="Riverfolk Company wins vs Keepers in Iron: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Keepers in Iron: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DFBC; color:#111827;" title="Riverfolk Company win rate vs Lizard Cult: 33.3%">
+            <td class="matchup-value-cell " data-win-rate="33.3%" data-wins="2" data-win-rate-title="Riverfolk Company win rate vs Lizard Cult: 33.3%" data-wins-title="Riverfolk Company wins vs Lizard Cult: 2" data-win-bg="#F1DFBC" data-win-text="#111827" style="background:#F1DFBC; color:#111827;" title="Riverfolk Company win rate vs Lizard Cult: 33.3%">
               
               33.3%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Lord of the Hundreds: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Riverfolk Company win rate vs Lord of the Hundreds: 0.0%" data-wins-title="Riverfolk Company wins vs Lord of the Hundreds: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Lord of the Hundreds: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DFBC; color:#111827;" title="Riverfolk Company win rate vs Marquise de Cat: 33.3%">
+            <td class="matchup-value-cell " data-win-rate="33.3%" data-wins="2" data-win-rate-title="Riverfolk Company win rate vs Marquise de Cat: 33.3%" data-wins-title="Riverfolk Company wins vs Marquise de Cat: 2" data-win-bg="#F1DFBC" data-win-text="#111827" style="background:#F1DFBC; color:#111827;" title="Riverfolk Company win rate vs Marquise de Cat: 33.3%">
               
               33.3%
               
@@ -1049,21 +1064,21 @@
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Riverfolk Company win rate vs Underground Duchy: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="1" data-win-rate-title="Riverfolk Company win rate vs Underground Duchy: 25.0%" data-wins-title="Riverfolk Company wins vs Underground Duchy: 1" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Riverfolk Company win rate vs Underground Duchy: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Riverfolk Company win rate vs Vagabond: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="1" data-win-rate-title="Riverfolk Company win rate vs Vagabond: 16.7%" data-wins-title="Riverfolk Company wins vs Vagabond: 1" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Riverfolk Company win rate vs Vagabond: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Woodland Alliance: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Riverfolk Company win rate vs Woodland Alliance: 0.0%" data-wins-title="Riverfolk Company wins vs Woodland Alliance: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Riverfolk Company win rate vs Woodland Alliance: 0.0%">
               
               0.0%
               
@@ -1076,49 +1091,49 @@
             <td class="faction-cell" style="background:#E8A549; color:#111827;">Underground Duchy</td>
             
             
-            <td class="" style="background:#F1E3BC; color:#111827;" title="Underground Duchy win rate vs Corvid Conspiracy: 37.5%">
+            <td class="matchup-value-cell " data-win-rate="37.5%" data-wins="3" data-win-rate-title="Underground Duchy win rate vs Corvid Conspiracy: 37.5%" data-wins-title="Underground Duchy wins vs Corvid Conspiracy: 3" data-win-bg="#F1E3BC" data-win-text="#111827" style="background:#F1E3BC; color:#111827;" title="Underground Duchy win rate vs Corvid Conspiracy: 37.5%">
               
               37.5%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Underground Duchy win rate vs Eyrie Dynasties: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Underground Duchy win rate vs Eyrie Dynasties: 0.0%" data-wins-title="Underground Duchy wins vs Eyrie Dynasties: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Underground Duchy win rate vs Eyrie Dynasties: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DFBC; color:#111827;" title="Underground Duchy win rate vs Keepers in Iron: 33.3%">
+            <td class="matchup-value-cell " data-win-rate="33.3%" data-wins="3" data-win-rate-title="Underground Duchy win rate vs Keepers in Iron: 33.3%" data-wins-title="Underground Duchy wins vs Keepers in Iron: 3" data-win-bg="#F1DFBC" data-win-text="#111827" style="background:#F1DFBC; color:#111827;" title="Underground Duchy win rate vs Keepers in Iron: 33.3%">
               
               33.3%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Underground Duchy win rate vs Lizard Cult: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="2" data-win-rate-title="Underground Duchy win rate vs Lizard Cult: 25.0%" data-wins-title="Underground Duchy wins vs Lizard Cult: 2" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Underground Duchy win rate vs Lizard Cult: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#E9F1BC; color:#111827;" title="Underground Duchy win rate vs Lord of the Hundreds: 57.1%">
+            <td class="matchup-value-cell " data-win-rate="57.1%" data-wins="4" data-win-rate-title="Underground Duchy win rate vs Lord of the Hundreds: 57.1%" data-wins-title="Underground Duchy wins vs Lord of the Hundreds: 4" data-win-bg="#E9F1BC" data-win-text="#111827" style="background:#E9F1BC; color:#111827;" title="Underground Duchy win rate vs Lord of the Hundreds: 57.1%">
               
               57.1%
               
             </td>
             
             
-            <td class="" style="background:#BCF1BC; color:#111827;" title="Underground Duchy win rate vs Marquise de Cat: 100.0%">
+            <td class="matchup-value-cell " data-win-rate="100.0%" data-wins="2" data-win-rate-title="Underground Duchy win rate vs Marquise de Cat: 100.0%" data-wins-title="Underground Duchy wins vs Marquise de Cat: 2" data-win-bg="#BCF1BC" data-win-text="#111827" style="background:#BCF1BC; color:#111827;" title="Underground Duchy win rate vs Marquise de Cat: 100.0%">
               
               100.0%
               
             </td>
             
             
-            <td class="" style="background:#F1F1BC; color:#111827;" title="Underground Duchy win rate vs Riverfolk Company: 50.0%">
+            <td class="matchup-value-cell " data-win-rate="50.0%" data-wins="2" data-win-rate-title="Underground Duchy win rate vs Riverfolk Company: 50.0%" data-wins-title="Underground Duchy wins vs Riverfolk Company: 2" data-win-bg="#F1F1BC" data-win-text="#111827" style="background:#F1F1BC; color:#111827;" title="Underground Duchy win rate vs Riverfolk Company: 50.0%">
               
               50.0%
               
@@ -1132,14 +1147,14 @@
             </td>
             
             
-            <td class="" style="background:#F1E6BC; color:#111827;" title="Underground Duchy win rate vs Vagabond: 40.0%">
+            <td class="matchup-value-cell " data-win-rate="40.0%" data-wins="2" data-win-rate-title="Underground Duchy win rate vs Vagabond: 40.0%" data-wins-title="Underground Duchy wins vs Vagabond: 2" data-win-bg="#F1E6BC" data-win-text="#111827" style="background:#F1E6BC; color:#111827;" title="Underground Duchy win rate vs Vagabond: 40.0%">
               
               40.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E3BC; color:#111827;" title="Underground Duchy win rate vs Woodland Alliance: 37.5%">
+            <td class="matchup-value-cell " data-win-rate="37.5%" data-wins="3" data-win-rate-title="Underground Duchy win rate vs Woodland Alliance: 37.5%" data-wins-title="Underground Duchy wins vs Woodland Alliance: 3" data-win-bg="#F1E3BC" data-win-text="#111827" style="background:#F1E3BC; color:#111827;" title="Underground Duchy win rate vs Woodland Alliance: 37.5%">
               
               37.5%
               
@@ -1152,56 +1167,56 @@
             <td class="faction-cell" style="background:#666666; color:#FFFFFF;">Vagabond</td>
             
             
-            <td class="" style="background:#F1CBBC; color:#111827;" title="Vagabond win rate vs Corvid Conspiracy: 14.3%">
+            <td class="matchup-value-cell " data-win-rate="14.3%" data-wins="1" data-win-rate-title="Vagabond win rate vs Corvid Conspiracy: 14.3%" data-wins-title="Vagabond wins vs Corvid Conspiracy: 1" data-win-bg="#F1CBBC" data-win-text="#111827" style="background:#F1CBBC; color:#111827;" title="Vagabond win rate vs Corvid Conspiracy: 14.3%">
               
               14.3%
               
             </td>
             
             
-            <td class="" style="background:#F1D6BC; color:#111827;" title="Vagabond win rate vs Eyrie Dynasties: 25.0%">
+            <td class="matchup-value-cell " data-win-rate="25.0%" data-wins="4" data-win-rate-title="Vagabond win rate vs Eyrie Dynasties: 25.0%" data-wins-title="Vagabond wins vs Eyrie Dynasties: 4" data-win-bg="#F1D6BC" data-win-text="#111827" style="background:#F1D6BC; color:#111827;" title="Vagabond win rate vs Eyrie Dynasties: 25.0%">
               
               25.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E6BC; color:#111827;" title="Vagabond win rate vs Keepers in Iron: 40.0%">
+            <td class="matchup-value-cell " data-win-rate="40.0%" data-wins="2" data-win-rate-title="Vagabond win rate vs Keepers in Iron: 40.0%" data-wins-title="Vagabond wins vs Keepers in Iron: 2" data-win-bg="#F1E6BC" data-win-text="#111827" style="background:#F1E6BC; color:#111827;" title="Vagabond win rate vs Keepers in Iron: 40.0%">
               
               40.0%
               
             </td>
             
             
-            <td class="" style="background:#F1BCBC; color:#111827;" title="Vagabond win rate vs Lizard Cult: 0.0%">
+            <td class="matchup-value-cell " data-win-rate="0.0%" data-wins="0" data-win-rate-title="Vagabond win rate vs Lizard Cult: 0.0%" data-wins-title="Vagabond wins vs Lizard Cult: 0" data-win-bg="#F1BCBC" data-win-text="#111827" style="background:#F1BCBC; color:#111827;" title="Vagabond win rate vs Lizard Cult: 0.0%">
               
               0.0%
               
             </td>
             
             
-            <td class="" style="background:#F1DABC; color:#111827;" title="Vagabond win rate vs Lord of the Hundreds: 28.6%">
+            <td class="matchup-value-cell " data-win-rate="28.6%" data-wins="2" data-win-rate-title="Vagabond win rate vs Lord of the Hundreds: 28.6%" data-wins-title="Vagabond wins vs Lord of the Hundreds: 2" data-win-bg="#F1DABC" data-win-text="#111827" style="background:#F1DABC; color:#111827;" title="Vagabond win rate vs Lord of the Hundreds: 28.6%">
               
               28.6%
               
             </td>
             
             
-            <td class="" style="background:#F1C5BC; color:#111827;" title="Vagabond win rate vs Marquise de Cat: 8.3%">
+            <td class="matchup-value-cell " data-win-rate="8.3%" data-wins="1" data-win-rate-title="Vagabond win rate vs Marquise de Cat: 8.3%" data-wins-title="Vagabond wins vs Marquise de Cat: 1" data-win-bg="#F1C5BC" data-win-text="#111827" style="background:#F1C5BC; color:#111827;" title="Vagabond win rate vs Marquise de Cat: 8.3%">
               
               8.3%
               
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Vagabond win rate vs Riverfolk Company: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="1" data-win-rate-title="Vagabond win rate vs Riverfolk Company: 16.7%" data-wins-title="Vagabond wins vs Riverfolk Company: 1" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Vagabond win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1D1BC; color:#111827;" title="Vagabond win rate vs Underground Duchy: 20.0%">
+            <td class="matchup-value-cell " data-win-rate="20.0%" data-wins="1" data-win-rate-title="Vagabond win rate vs Underground Duchy: 20.0%" data-wins-title="Vagabond wins vs Underground Duchy: 1" data-win-bg="#F1D1BC" data-win-text="#111827" style="background:#F1D1BC; color:#111827;" title="Vagabond win rate vs Underground Duchy: 20.0%">
               
               20.0%
               
@@ -1215,7 +1230,7 @@
             </td>
             
             
-            <td class="" style="background:#F1C9BC; color:#111827;" title="Vagabond win rate vs Woodland Alliance: 12.5%">
+            <td class="matchup-value-cell " data-win-rate="12.5%" data-wins="2" data-win-rate-title="Vagabond win rate vs Woodland Alliance: 12.5%" data-wins-title="Vagabond wins vs Woodland Alliance: 2" data-win-bg="#F1C9BC" data-win-text="#111827" style="background:#F1C9BC; color:#111827;" title="Vagabond win rate vs Woodland Alliance: 12.5%">
               
               12.5%
               
@@ -1228,63 +1243,63 @@
             <td class="faction-cell" style="background:#11823E; color:#FFFFFF;">Woodland Alliance</td>
             
             
-            <td class="" style="background:#F1E6BC; color:#111827;" title="Woodland Alliance win rate vs Corvid Conspiracy: 40.0%">
+            <td class="matchup-value-cell " data-win-rate="40.0%" data-wins="4" data-win-rate-title="Woodland Alliance win rate vs Corvid Conspiracy: 40.0%" data-wins-title="Woodland Alliance wins vs Corvid Conspiracy: 4" data-win-bg="#F1E6BC" data-win-text="#111827" style="background:#F1E6BC; color:#111827;" title="Woodland Alliance win rate vs Corvid Conspiracy: 40.0%">
               
               40.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D3BC; color:#111827;" title="Woodland Alliance win rate vs Eyrie Dynasties: 22.2%">
+            <td class="matchup-value-cell " data-win-rate="22.2%" data-wins="4" data-win-rate-title="Woodland Alliance win rate vs Eyrie Dynasties: 22.2%" data-wins-title="Woodland Alliance wins vs Eyrie Dynasties: 4" data-win-bg="#F1D3BC" data-win-text="#111827" style="background:#F1D3BC; color:#111827;" title="Woodland Alliance win rate vs Eyrie Dynasties: 22.2%">
               
               22.2%
               
             </td>
             
             
-            <td class="" style="background:#F1DABC; color:#111827;" title="Woodland Alliance win rate vs Keepers in Iron: 28.6%">
+            <td class="matchup-value-cell " data-win-rate="28.6%" data-wins="2" data-win-rate-title="Woodland Alliance win rate vs Keepers in Iron: 28.6%" data-wins-title="Woodland Alliance wins vs Keepers in Iron: 2" data-win-bg="#F1DABC" data-win-text="#111827" style="background:#F1DABC; color:#111827;" title="Woodland Alliance win rate vs Keepers in Iron: 28.6%">
               
               28.6%
               
             </td>
             
             
-            <td class="" style="background:#F1D1BC; color:#111827;" title="Woodland Alliance win rate vs Lizard Cult: 20.0%">
+            <td class="matchup-value-cell " data-win-rate="20.0%" data-wins="2" data-win-rate-title="Woodland Alliance win rate vs Lizard Cult: 20.0%" data-wins-title="Woodland Alliance wins vs Lizard Cult: 2" data-win-bg="#F1D1BC" data-win-text="#111827" style="background:#F1D1BC; color:#111827;" title="Woodland Alliance win rate vs Lizard Cult: 20.0%">
               
               20.0%
               
             </td>
             
             
-            <td class="" style="background:#F1D1BC; color:#111827;" title="Woodland Alliance win rate vs Lord of the Hundreds: 20.0%">
+            <td class="matchup-value-cell " data-win-rate="20.0%" data-wins="2" data-win-rate-title="Woodland Alliance win rate vs Lord of the Hundreds: 20.0%" data-wins-title="Woodland Alliance wins vs Lord of the Hundreds: 2" data-win-bg="#F1D1BC" data-win-text="#111827" style="background:#F1D1BC; color:#111827;" title="Woodland Alliance win rate vs Lord of the Hundreds: 20.0%">
               
               20.0%
               
             </td>
             
             
-            <td class="" style="background:#F1E2BC; color:#111827;" title="Woodland Alliance win rate vs Marquise de Cat: 35.7%">
+            <td class="matchup-value-cell " data-win-rate="35.7%" data-wins="5" data-win-rate-title="Woodland Alliance win rate vs Marquise de Cat: 35.7%" data-wins-title="Woodland Alliance wins vs Marquise de Cat: 5" data-win-bg="#F1E2BC" data-win-text="#111827" style="background:#F1E2BC; color:#111827;" title="Woodland Alliance win rate vs Marquise de Cat: 35.7%">
               
               35.7%
               
             </td>
             
             
-            <td class="" style="background:#F1CDBC; color:#111827;" title="Woodland Alliance win rate vs Riverfolk Company: 16.7%">
+            <td class="matchup-value-cell " data-win-rate="16.7%" data-wins="1" data-win-rate-title="Woodland Alliance win rate vs Riverfolk Company: 16.7%" data-wins-title="Woodland Alliance wins vs Riverfolk Company: 1" data-win-bg="#F1CDBC" data-win-text="#111827" style="background:#F1CDBC; color:#111827;" title="Woodland Alliance win rate vs Riverfolk Company: 16.7%">
               
               16.7%
               
             </td>
             
             
-            <td class="" style="background:#F1C9BC; color:#111827;" title="Woodland Alliance win rate vs Underground Duchy: 12.5%">
+            <td class="matchup-value-cell " data-win-rate="12.5%" data-wins="1" data-win-rate-title="Woodland Alliance win rate vs Underground Duchy: 12.5%" data-wins-title="Woodland Alliance wins vs Underground Duchy: 1" data-win-bg="#F1C9BC" data-win-text="#111827" style="background:#F1C9BC; color:#111827;" title="Woodland Alliance win rate vs Underground Duchy: 12.5%">
               
               12.5%
               
             </td>
             
             
-            <td class="" style="background:#F1E3BC; color:#111827;" title="Woodland Alliance win rate vs Vagabond: 37.5%">
+            <td class="matchup-value-cell " data-win-rate="37.5%" data-wins="6" data-win-rate-title="Woodland Alliance win rate vs Vagabond: 37.5%" data-wins-title="Woodland Alliance wins vs Vagabond: 6" data-win-bg="#F1E3BC" data-win-text="#111827" style="background:#F1E3BC; color:#111827;" title="Woodland Alliance win rate vs Vagabond: 37.5%">
               
               37.5%
               
@@ -1836,6 +1851,41 @@
         for (const row of lockedRows) {
           tbody.appendChild(row);
         }
+      }
+
+      function applyMatchupMetric(metric) {
+        const table = document.querySelector("table.matrix-table");
+        if (!table) {
+          return;
+        }
+        table.querySelectorAll("td.matchup-value-cell").forEach((cell) => {
+          if (metric === "wins") {
+            cell.textContent = cell.dataset.wins || "";
+            cell.removeAttribute("style");
+            cell.title = cell.dataset.winsTitle || "";
+            return;
+          }
+          cell.textContent = cell.dataset.winRate || "";
+          if (cell.dataset.winBg) {
+            cell.style.background = cell.dataset.winBg;
+          }
+          if (cell.dataset.winText) {
+            cell.style.color = cell.dataset.winText;
+          }
+          cell.title = cell.dataset.winRateTitle || "";
+        });
+      }
+
+      const matrixMetricSelect = document.getElementById("matrix-metric-select");
+      if (matrixMetricSelect) {
+        applyMatchupMetric(matrixMetricSelect.value);
+        matrixMetricSelect.addEventListener("change", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLSelectElement)) {
+            return;
+          }
+          applyMatchupMetric(target.value);
+        });
       }
 
       document.querySelectorAll("table").forEach((table) => {
