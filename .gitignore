@@ -2,3 +2,13 @@ __pycache__/
 *.pyc
 leaderboard.db
 .DS_Store
+
+# Personal game data (keep local/private)
+screenshots/
+contact_sheets/
+confirmed_matches.csv
+pending_manual_scores.txt
+relevant_screenshots.txt
+root_faction_overrides.csv
+root_faction_assignments_export*.csv
+tmp_crop_*.jpg
