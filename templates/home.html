@@ -17,7 +17,6 @@
 
     <div class="card" style="margin-top: 20px;">
       <h2>Leaderboard</h2>
-      <p>Ranked by overall win share (wins / games played).</p>
       <table>
         <thead>
           <tr>
@@ -25,7 +24,6 @@
             <th>Games</th>
             <th>Wins</th>
             <th>Win Rate</th>
-            <th>Placement Pts</th>
           </tr>
         </thead>
         <tbody>
@@ -35,10 +33,9 @@
             <td>{{ row['games_played'] }}</td>
             <td>{{ row['wins'] }}</td>
             <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-            <td>{{ row['placement_points'] }}</td>
           </tr>
           {% else %}
-          <tr><td colspan="5">No confirmed game results yet.</td></tr>
+          <tr><td colspan="4">No confirmed game results yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
