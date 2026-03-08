@@ -2,10 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Review Screenshot #{{ match['id'] }}</title>
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 24px; }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 24px; color: #111827; }
+      .grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(320px, 1fr); gap: 20px; }
       .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
       textarea, input, select { width: 100%; padding: 8px; margin-bottom: 10px; }
       button { padding: 8px 12px; }
@@ -16,6 +17,15 @@
       .flash-success { background: #ecfdf3; border-color: #a7f3d0; color: #065f46; }
       .flash-error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
       .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .preview-table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+      .preview-table th, .preview-table td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+      .preview-table th { background: #f7f7f7; }
+      .muted { color: #4b5563; margin-top: 0; }
+      .details { margin-top: 12px; }
+      @media (max-width: 980px) {
+        body { margin: 16px; }
+        .grid { grid-template-columns: 1fr; }
+      }
     </style>
   </head>
   <body>
@@ -32,14 +42,18 @@
     <div class="grid">
       <div class="card">
         <img src="{{ url_for('serve_image', match_id=match['id']) }}" alt="Screenshot" />
-        <p><strong>Path:</strong> {{ match['screenshot_path'] }}</p>
-        <p><strong>Relevance score:</strong> {{ '%.2f'|format(match['relevance_score']) }}</p>
+        <p class="muted">Review only the game, player order, and scores needed for leaderboard stats.</p>
       </div>
 
       <div class="card">
         <form method="post">
           <label>Game name</label>
-          <input type="text" name="game_name" placeholder="e.g. Catan" value="{{ default_game_name }}" required />
+          <input type="text" name="game_name" list="supported-games" placeholder="e.g. root" value="{{ default_game_name }}" required />
+          <datalist id="supported-games">
+            {% for game_name in supported_games %}
+            <option value="{{ game_name }}"></option>
+            {% endfor %}
+          </datalist>
 
           <label>Winner rule</label>
           <select name="higher_is_better">
@@ -50,9 +64,9 @@
           <label>Played at (optional)</label>
           <input type="text" name="played_at" value="{{ match['played_at'] or '' }}" />
 
-          <label>Scores (one per line)</label>
-          <p>Use <code>Player,Score</code> or <code>Player,NA</code> for non-numeric dominance/coalition markers.</p>
-          <textarea name="scores_text" rows="10">{{ scores_text }}</textarea>
+          <label>Detected result (one row per player)</label>
+          <p>Format: <code>Placement|Player|Score</code> with <code>NA</code> when score is unreadable; placement order drives winner when scores are unknown.</p>
+          <textarea name="scores_text" rows="9">{{ scores_text }}</textarea>
 
           <div class="actions">
             <button type="submit" name="action" value="save">Save result</button>
@@ -60,15 +74,42 @@
             <button type="submit" name="action" value="ignore">Ignore screenshot</button>
           </div>
         </form>
+        {% if root_faction_preview %}
+        <h3>Root faction preview</h3>
+        <p>Auto-detected before save. Confidence: {{ '%.2f'|format(root_faction_preview_confidence or 0) }}</p>
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Faction</th>
+              <th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in root_faction_preview %}
+            <tr>
+              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['faction_name'] }}</td>
+              <td>{{ '%.2f'|format(row['confidence']) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
       </div>
     </div>
 
-    <div class="card" style="margin-top: 20px;">
-      <h2>OCR text</h2>
-      {% if not ocr_available %}
-      <p>OCR is not available in this environment.</p>
-      {% endif %}
-      <pre>{{ match['ocr_text'] or 'No OCR output.' }}</pre>
+    <div class="card details">
+      <details>
+        <summary>Debug details</summary>
+        <p><strong>Path:</strong> {{ match['screenshot_path'] }}</p>
+        <p><strong>Relevance score:</strong> {{ '%.2f'|format(match['relevance_score']) }}</p>
+        <h3>OCR text</h3>
+        {% if not ocr_available %}
+        <p>OCR is not available in this environment.</p>
+        {% endif %}
+        <pre>{{ match['ocr_text'] or 'No OCR output.' }}</pre>
+      </details>
     </div>
   </body>
 </html>

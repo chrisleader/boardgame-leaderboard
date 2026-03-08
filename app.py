@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import colorsys
 import csv
+import difflib
 import itertools
 import json
 import os
@@ -15,7 +16,7 @@ from uuid import uuid4
 
 from dateutil import parser as dt_parser
 from flask import Flask, flash, get_flashed_messages, redirect, render_template, request, send_file, url_for
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageOps
 from werkzeug.utils import secure_filename
 
 try:
@@ -40,6 +41,7 @@ ROOT_SLOT_Y_BANDS = [(0.74, 0.81), (0.75, 0.82), (0.76, 0.83)]
 PLAYER_ALIASES = {
     "migidoes": "hypersundays",
 }
+SUPPORTED_GAMES = ("root", "everdell", "dune")
 
 
 def parse_enabled_modules(raw_value: str | None) -> set[str]:
@@ -52,10 +54,20 @@ def parse_enabled_modules(raw_value: str | None) -> set[str]:
 
 
 ENABLED_MODULES = parse_enabled_modules(os.getenv("ENABLED_MODULES"))
+UPLOAD_REVIEW_ENABLED = os.getenv("ENABLE_UPLOAD_REVIEW", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 
 def module_enabled(module_name: str) -> bool:
     return module_name.strip().lower() in ENABLED_MODULES
+
+
+def upload_review_enabled() -> bool:
+    return UPLOAD_REVIEW_ENABLED
 
 
 class ExtractedScore(NamedTuple):
@@ -222,6 +234,441 @@ def run_ocr(image_path: Path) -> str:
         return ""
 
 
+def known_player_names(conn: sqlite3.Connection) -> list[str]:
+    rows = conn.execute("SELECT name FROM players ORDER BY name ASC").fetchall()
+    return [str(row["name"]) for row in rows]
+
+
+def normalize_player_token(raw_value: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", raw_value.lower())
+
+
+def match_known_player_name(raw_value: str, known_players: list[str]) -> str | None:
+    cleaned = canonicalize_player_name(raw_value)
+    token = normalize_player_token(cleaned)
+    if not token:
+        return None
+
+    if not known_players:
+        return cleaned
+
+    for player_name in known_players:
+        if normalize_player_token(player_name) == token:
+            return player_name
+
+    best_name = cleaned
+    best_score = 0.0
+    for player_name in known_players:
+        score = difflib.SequenceMatcher(
+            None, normalize_player_token(player_name), token
+        ).ratio()
+        if score > best_score:
+            best_score = score
+            best_name = player_name
+
+    return best_name if best_score >= 0.72 else None
+
+
+def parse_numeric_token(raw_token: str) -> tuple[int, int] | None:
+    matches = re.findall(r"\d{1,4}", raw_token)
+    if not matches:
+        return None
+
+    digits = max(matches, key=len)
+    value = int(digits)
+    digit_len = len(digits)
+    if digit_len == 4:
+        value = int(digits[:3])
+        digit_len = 3
+    if digit_len == 3 and value > 150:
+        value = int(digits[:2])
+        digit_len = 2
+    if value <= 0 or value > 300:
+        return None
+    return value, digit_len
+
+
+def extract_scores_from_bottom_band(
+    image_path: Path,
+    known_players: list[str],
+) -> list[ExtractedScore]:
+    if pytesseract is None:
+        return []
+
+    try:
+        with Image.open(image_path) as image:
+            width, height = image.size
+            x1 = int(width * 0.05)
+            x2 = int(width * 0.95)
+            token_rows: list[dict[str, object]] = []
+            for y_start_ratio in (0.66, 0.68, 0.70):
+                y1 = int(height * y_start_ratio)
+                y2 = int(height * 0.98)
+                if x2 <= x1 or y2 <= y1:
+                    continue
+                bottom_band = image.crop((x1, y1, x2, y2))
+                grayscale = ImageOps.grayscale(bottom_band)
+                thresholded = ImageEnhance.Contrast(grayscale).enhance(3.0).point(
+                    lambda value: 255 if value > 120 else 0
+                )
+
+                for variant in (bottom_band, thresholded):
+                    data = pytesseract.image_to_data(
+                        variant,
+                        config="--psm 6",
+                        output_type=pytesseract.Output.DICT,
+                    )
+                    token_count = len(data.get("text", []))
+                    for index in range(token_count):
+                        raw_text = (data["text"][index] or "").strip()
+                        if not raw_text:
+                            continue
+                        conf_raw = data["conf"][index]
+                        try:
+                            confidence = float(conf_raw)
+                        except Exception:
+                            confidence = -1.0
+                        token_rows.append(
+                            {
+                                "raw_text": raw_text,
+                                "left": int(data["left"][index]),
+                                "top": int(data["top"][index]),
+                                "width": int(data["width"][index]),
+                                "height": int(data["height"][index]),
+                                "confidence": confidence,
+                            }
+                        )
+    except Exception:
+        return []
+
+    if not token_rows:
+        return []
+
+    name_positions: dict[str, dict[str, object]] = {}
+    numeric_candidates: list[dict[str, object]] = []
+    for token in token_rows:
+        raw_text = str(token["raw_text"])
+        confidence = float(token["confidence"])
+        left = int(token["left"])
+
+        if re.search(r"[A-Za-z]", raw_text):
+            alpha_only = re.sub(r"[^A-Za-z]", "", raw_text)
+            if len(alpha_only) >= 3 and confidence >= 30:
+                matched_name = match_known_player_name(raw_text, known_players)
+                if not matched_name:
+                    continue
+                existing = name_positions.get(matched_name)
+                if not existing or confidence > float(existing["confidence"]):
+                    name_positions[matched_name] = {"left": left, "confidence": confidence}
+
+        numeric = parse_numeric_token(raw_text)
+        if numeric is None:
+            continue
+        score_value, digit_len = numeric
+        if digit_len == 1 and confidence < 70:
+            continue
+        numeric_candidates.append(
+            {
+                "score": score_value,
+                "digits": digit_len,
+                "left": left,
+                "confidence": confidence,
+            }
+        )
+
+    if not name_positions:
+        return []
+
+    sorted_names = sorted(
+        name_positions.items(),
+        key=lambda row: int(row[1]["left"]),
+    )
+    used_candidate_indexes: set[int] = set()
+    max_horizontal_gap = max(120, int((x2 - x1) * 0.25))
+    extracted: list[ExtractedScore] = []
+
+    for player_name, position in sorted_names:
+        name_x = int(position["left"])
+        best_candidate_idx: int | None = None
+        best_rank: tuple[int, int, float] | None = None
+        for index, candidate in enumerate(numeric_candidates):
+            if index in used_candidate_indexes:
+                continue
+            score_x = int(candidate["left"])
+            distance = name_x - score_x
+            if distance < 0 or distance > max_horizontal_gap:
+                continue
+            rank = (
+                0 if int(candidate["digits"]) >= 2 else 1,
+                distance,
+                -float(candidate["confidence"]),
+            )
+            if best_rank is None or rank < best_rank:
+                best_rank = rank
+                best_candidate_idx = index
+
+        if best_candidate_idx is None:
+            extracted.append(
+                ExtractedScore(
+                    player_name=player_name,
+                    score=None,
+                    score_status="unknown",
+                )
+            )
+            continue
+
+        used_candidate_indexes.add(best_candidate_idx)
+        extracted.append(
+            ExtractedScore(
+                player_name=player_name,
+                score=int(numeric_candidates[best_candidate_idx]["score"]),
+                score_status="numeric",
+            )
+        )
+
+    return extracted
+
+
+def extract_scores_from_ranked_rows(
+    image_path: Path,
+    known_players: list[str],
+) -> list[ExtractedScore]:
+    if pytesseract is None:
+        return []
+
+    def extract_from_token_rows(
+        token_rows: list[dict[str, object]],
+        image_width: int,
+    ) -> list[ExtractedScore]:
+        if not token_rows:
+            return []
+
+        name_positions: dict[str, dict[str, object]] = {}
+        numeric_candidates: list[dict[str, object]] = []
+        for token in token_rows:
+            raw_text = str(token["raw_text"])
+            confidence = float(token["confidence"])
+            left = int(token["left"])
+            top = int(token["top"])
+            width = int(token["width"])
+            height = int(token["height"])
+
+            if re.search(r"[A-Za-z]", raw_text):
+                alpha_only = re.sub(r"[^A-Za-z]", "", raw_text)
+                if len(alpha_only) >= 3 and confidence >= 18:
+                    matched_name = match_known_player_name(raw_text, known_players)
+                    if matched_name:
+                        existing = name_positions.get(matched_name)
+                        if not existing or confidence > float(existing["confidence"]):
+                            name_positions[matched_name] = {
+                                "left": left,
+                                "top": top,
+                                "width": width,
+                                "height": height,
+                                "confidence": confidence,
+                            }
+
+            numeric = parse_numeric_token(raw_text)
+            if numeric is None:
+                continue
+            score_value, digit_len = numeric
+            if score_value > 99:
+                continue
+            if digit_len == 1 and confidence < 55:
+                continue
+            if digit_len >= 2 and confidence < 40:
+                continue
+            numeric_candidates.append(
+                {
+                    "score": score_value,
+                    "digits": digit_len,
+                    "left": left,
+                    "top": top,
+                    "confidence": confidence,
+                }
+            )
+
+        if not name_positions:
+            return []
+
+        sorted_names = sorted(
+            name_positions.items(),
+            key=lambda row: (int(row[1]["top"]), int(row[1]["left"])),
+        )
+        used_candidate_indexes: set[int] = set()
+        extracted: list[ExtractedScore] = []
+        max_horizontal_gap = max(120, int(image_width * 0.62))
+
+        for player_name, position in sorted_names:
+            name_left = int(position["left"])
+            name_top = int(position["top"])
+            name_width = int(position["width"])
+            name_height = int(position["height"])
+            max_vertical_gap = max(24, int(name_height * 2.2))
+            best_candidate_idx: int | None = None
+            best_rank: tuple[int, int, int, float] | None = None
+            for index, candidate in enumerate(numeric_candidates):
+                if index in used_candidate_indexes:
+                    continue
+                score_x = int(candidate["left"])
+                score_y = int(candidate["top"])
+                horizontal_gap = score_x - name_left
+                if horizontal_gap < max(10, int(name_width * 0.25)):
+                    continue
+                if horizontal_gap > max_horizontal_gap:
+                    continue
+                vertical_gap = abs(score_y - name_top)
+                if vertical_gap > max_vertical_gap:
+                    continue
+                rank = (
+                    0 if int(candidate["digits"]) >= 2 else 1,
+                    vertical_gap,
+                    abs(horizontal_gap - int(image_width * 0.18)),
+                    -float(candidate["confidence"]),
+                )
+                if best_rank is None or rank < best_rank:
+                    best_rank = rank
+                    best_candidate_idx = index
+
+            if best_candidate_idx is None:
+                extracted.append(
+                    ExtractedScore(
+                        player_name=player_name,
+                        score=None,
+                        score_status="unknown",
+                    )
+                )
+                continue
+
+            used_candidate_indexes.add(best_candidate_idx)
+            extracted.append(
+                ExtractedScore(
+                    player_name=player_name,
+                    score=int(numeric_candidates[best_candidate_idx]["score"]),
+                    score_status="numeric",
+                )
+            )
+
+        return extracted
+
+    try:
+        with Image.open(image_path) as image:
+            rgb_image = image.convert("RGB")
+            width, height = rgb_image.size
+            full_gray = ImageOps.grayscale(rgb_image)
+            full_cont2 = ImageEnhance.Contrast(full_gray).enhance(2.0)
+            full_cont3 = ImageEnhance.Contrast(full_gray).enhance(3.0)
+            full_thr = full_cont3.point(lambda value: 255 if value > 145 else 0)
+
+            right_panel = rgb_image.crop(
+                (
+                    int(width * 0.32),
+                    int(height * 0.06),
+                    int(width * 0.98),
+                    int(height * 0.90),
+                )
+            )
+            panel_gray = ImageOps.grayscale(right_panel)
+            panel_cont2 = ImageEnhance.Contrast(panel_gray).enhance(2.0)
+            panel_cont3 = ImageEnhance.Contrast(panel_gray).enhance(3.0)
+            panel_thr = panel_cont3.point(lambda value: 255 if value > 145 else 0)
+
+            upscaled_full = rgb_image.resize(
+                (int(width * 2), int(height * 2)),
+                Image.Resampling.LANCZOS,
+            )
+            up_full_gray = ImageOps.grayscale(upscaled_full)
+            up_full_cont2 = ImageEnhance.Contrast(up_full_gray).enhance(2.0)
+
+            upscaled_panel = right_panel.resize(
+                (int(right_panel.width * 3), int(right_panel.height * 3)),
+                Image.Resampling.LANCZOS,
+            )
+            up_panel_gray = ImageOps.grayscale(upscaled_panel)
+            up_panel_cont2 = ImageEnhance.Contrast(up_panel_gray).enhance(2.0)
+
+            variants: list[tuple[Image.Image, str]] = [
+                (full_gray, "--psm 6"),
+                (full_cont2, "--psm 6"),
+                (full_cont3, "--psm 6"),
+                (full_thr, "--psm 6"),
+                (panel_gray, "--psm 6"),
+                (panel_cont2, "--psm 6"),
+                (panel_cont3, "--psm 6"),
+                (panel_thr, "--psm 6"),
+                (up_full_gray, "--psm 6"),
+                (up_full_cont2, "--psm 6"),
+                (up_panel_gray, "--psm 6"),
+                (up_panel_cont2, "--psm 6"),
+                (up_panel_cont2, "--psm 11"),
+            ]
+    except Exception:
+        return []
+
+    best_scores: list[ExtractedScore] = []
+    for variant_image, psm_config in variants:
+        data = pytesseract.image_to_data(
+            variant_image,
+            config=psm_config,
+            output_type=pytesseract.Output.DICT,
+        )
+        token_rows: list[dict[str, object]] = []
+        token_count = len(data.get("text", []))
+        for index in range(token_count):
+            raw_text = (data["text"][index] or "").strip()
+            if not raw_text:
+                continue
+            conf_raw = data["conf"][index]
+            try:
+                confidence = float(conf_raw)
+            except Exception:
+                confidence = -1.0
+            token_rows.append(
+                {
+                    "raw_text": raw_text,
+                    "left": int(data["left"][index]),
+                    "top": int(data["top"][index]),
+                    "width": int(data["width"][index]),
+                    "height": int(data["height"][index]),
+                    "confidence": confidence,
+                }
+            )
+
+        candidate = extract_from_token_rows(token_rows, variant_image.width)
+        if extracted_scores_quality(candidate) > extracted_scores_quality(best_scores):
+            best_scores = candidate
+
+    return best_scores
+
+
+def extracted_scores_numeric_count(scores: list[ExtractedScore]) -> int:
+    return sum(
+        1
+        for row in scores
+        if row.score_status == "numeric" and row.score is not None
+    )
+
+
+def extracted_scores_quality(scores: list[ExtractedScore]) -> tuple[int, int]:
+    return (len(scores), extracted_scores_numeric_count(scores))
+
+
+def best_extracted_scores_for_image(
+    conn: sqlite3.Connection,
+    image_path: Path,
+    initial_scores: list[ExtractedScore],
+) -> list[ExtractedScore]:
+    best_scores = initial_scores
+    known_players = known_player_names(conn)
+    for candidate in (
+        extract_scores_from_bottom_band(image_path, known_players),
+        extract_scores_from_ranked_rows(image_path, known_players),
+    ):
+        if extracted_scores_quality(candidate) > extracted_scores_quality(best_scores):
+            best_scores = candidate
+    return best_scores
+
+
 def extract_scores(ocr_text: str) -> list[ExtractedScore]:
     scores: list[ExtractedScore] = []
     seen = set()
@@ -253,8 +700,14 @@ def calc_relevance(ocr_text: str, extracted_scores: list[ExtractedScore]) -> flo
         for token in ["score", "points", "leaderboard", "ranking", "round", "final", "results"]
     )
 
-    if len(extracted_scores) >= 2:
-        numeric_signal = min(len(extracted_scores), 6)
+    numeric_scores = [
+        row
+        for row in extracted_scores
+        if row.score_status == "numeric" and row.score is not None
+    ]
+
+    if len(numeric_scores) >= 2:
+        numeric_signal = min(len(numeric_scores), 6)
     else:
         numeric_signal = 0
 
@@ -264,6 +717,17 @@ def calc_relevance(ocr_text: str, extracted_scores: list[ExtractedScore]) -> flo
         relevance += 0.1
 
     return relevance
+
+
+def count_numeric_scores(raw_scores: list[dict[str, object]]) -> int:
+    total = 0
+    for row in raw_scores:
+        if row.get("score") is None:
+            continue
+        status = str(row.get("score_status") or "numeric").lower()
+        if status == "numeric":
+            total += 1
+    return total
 
 
 def infer_played_at(image_path: Path, ocr_text: str) -> str | None:
@@ -299,6 +763,7 @@ def upsert_match_from_image(conn: sqlite3.Connection, image_path: Path) -> bool:
 
     ocr_text = run_ocr(image_path)
     extracted_scores = extract_scores(ocr_text)
+    extracted_scores = best_extracted_scores_for_image(conn, image_path, extracted_scores)
     relevance_score = calc_relevance(ocr_text, extracted_scores)
     played_at = infer_played_at(image_path, ocr_text)
 
@@ -617,6 +1082,85 @@ def assign_root_factions(
     return assignments, global_confidence
 
 
+def best_root_faction_assignment(
+    image_path: Path,
+    player_count: int,
+    faction_samples_map: dict[str, list[tuple[int, int, int]]],
+) -> tuple[list[tuple[str, float]], list[tuple[int, int, int]], float] | None:
+    best_assignment: list[tuple[str, float]] | None = None
+    best_slot_colors: list[tuple[int, int, int]] | None = None
+    best_confidence = -1.0
+    for y_start_ratio, y_end_ratio in ROOT_SLOT_Y_BANDS:
+        slot_colors = extract_root_slot_colors(image_path, player_count, y_start_ratio, y_end_ratio)
+        assigned = assign_root_factions(slot_colors, faction_samples_map)
+        if assigned is None:
+            continue
+        assignments, global_confidence = assigned
+        if global_confidence > best_confidence:
+            best_confidence = global_confidence
+            best_assignment = assignments
+            best_slot_colors = slot_colors
+
+    if best_assignment is None or best_slot_colors is None:
+        return None
+    return best_assignment, best_slot_colors, best_confidence
+
+
+def preview_root_factions_from_scores(
+    conn: sqlite3.Connection,
+    image_path: Path,
+    scores: list[ExtractedScore],
+    higher_is_better: bool = True,
+) -> tuple[list[dict[str, object]], float] | None:
+    if not image_path.exists():
+        return None
+    if len(scores) < 2:
+        return None
+
+    cleaned_scores = [
+        ExtractedScore(
+            player_name=canonicalize_player_name(item.player_name),
+            score=item.score,
+            score_status=item.score_status or ("numeric" if item.score is not None else "unknown"),
+        )
+        for item in scores
+        if canonicalize_player_name(item.player_name)
+    ]
+    if len(cleaned_scores) < 2:
+        return None
+
+    placements = assign_placements(cleaned_scores, higher_is_better)
+    indexed_scores = list(enumerate(cleaned_scores))
+    indexed_scores.sort(
+        key=lambda row: (
+            placements[row[0]],
+            -row[1].score if row[1].score is not None else 999999,
+            row[0],
+        )
+    )
+
+    player_order = [row[1].player_name for row in indexed_scores]
+    player_count = len(player_order)
+    faction_samples_map = root_faction_samples(conn)
+    if len(faction_samples_map) < player_count:
+        return None
+
+    assigned = best_root_faction_assignment(image_path, player_count, faction_samples_map)
+    if assigned is None:
+        return None
+
+    assignment_rows, _, global_confidence = assigned
+    preview_rows = [
+        {
+            "player_name": player_name,
+            "faction_name": faction_name,
+            "confidence": confidence,
+        }
+        for player_name, (faction_name, confidence) in zip(player_order, assignment_rows)
+    ]
+    return preview_rows, global_confidence
+
+
 def infer_root_factions_for_match(conn: sqlite3.Connection, match_id: int) -> int:
     match_row = conn.execute(
         """
@@ -654,22 +1198,10 @@ def infer_root_factions_for_match(conn: sqlite3.Connection, match_id: int) -> in
     if len(faction_samples_map) < player_count:
         return 0
 
-    best_assignment: list[tuple[str, float]] | None = None
-    best_slot_colors: list[tuple[int, int, int]] | None = None
-    best_confidence = -1.0
-    for y_start_ratio, y_end_ratio in ROOT_SLOT_Y_BANDS:
-        slot_colors = extract_root_slot_colors(image_path, player_count, y_start_ratio, y_end_ratio)
-        assigned = assign_root_factions(slot_colors, faction_samples_map)
-        if assigned is None:
-            continue
-        assignments, global_confidence = assigned
-        if global_confidence > best_confidence:
-            best_confidence = global_confidence
-            best_assignment = assignments
-            best_slot_colors = slot_colors
-
-    if best_assignment is None or best_slot_colors is None:
+    best = best_root_faction_assignment(image_path, player_count, faction_samples_map)
+    if best is None:
         return 0
+    best_assignment, best_slot_colors, _ = best
 
     faction_id_rows = conn.execute(
         "SELECT id, name FROM factions WHERE game_name = 'root'"
@@ -745,6 +1277,98 @@ def backfill_root_factions(conn: sqlite3.Connection) -> int:
     return updated
 
 
+def infer_supported_game_name(
+    conn: sqlite3.Connection,
+    image_path: Path,
+    ocr_text: str,
+    scores: list[ExtractedScore],
+) -> str:
+    parent_name = image_path.parent.name.strip().lower()
+    if parent_name in SUPPORTED_GAMES:
+        return parent_name
+
+    text = (ocr_text or "").lower()
+    text_has_dune_markers = any(
+        token in text
+        for token in (
+            "atreides",
+            "harkonnen",
+            "fremen",
+            "bene gesserit",
+            "spice",
+            "view board",
+            "continue",
+        )
+    )
+    text_has_everdell_markers = any(
+        token in text
+        for token in (
+            "everdell",
+            "main menu",
+            "berry",
+            "berries",
+            "twig",
+            "twigs",
+            "resin",
+            "pebble",
+            "pebbles",
+        )
+    )
+    text_has_ordinal_rows = bool(
+        re.search(r"\b(1st|ist|2nd|2n0d|3rd|4th)\b", text)
+    )
+
+    numeric_scores = [
+        row.score
+        for row in scores
+        if row.score_status == "numeric" and row.score is not None
+    ]
+
+    image_width = 0
+    if image_path.exists():
+        try:
+            with Image.open(image_path) as image:
+                image_width = image.size[0]
+        except Exception:
+            image_width = 0
+
+    if module_enabled("root") and len(scores) >= 3 and image_path.exists():
+        try:
+            faction_samples_map = root_faction_samples(conn)
+            assignment = best_root_faction_assignment(
+                image_path,
+                len(scores),
+                faction_samples_map,
+            )
+        except Exception:
+            assignment = None
+        if assignment is not None and assignment[2] >= 0.20:
+            return "root"
+
+    if text_has_dune_markers:
+        return "dune"
+    if text_has_everdell_markers:
+        return "everdell"
+
+    if text_has_ordinal_rows:
+        if numeric_scores:
+            if max(numeric_scores) <= 22:
+                return "dune"
+            if max(numeric_scores) >= 30:
+                return "everdell"
+        if 0 < image_width <= 900:
+            return "dune"
+        return "everdell"
+
+    if 0 < image_width <= 900 and len(scores) >= 3:
+        return "dune"
+
+    if numeric_scores and len(scores) >= 3 and max(numeric_scores) <= 40 and image_width >= 1000:
+        return "root"
+
+    return ""
+
+
 def parse_scores_text(raw_scores: str) -> list[ExtractedScore]:
     parsed: list[ExtractedScore] = []
 
@@ -753,18 +1377,34 @@ def parse_scores_text(raw_scores: str) -> list[ExtractedScore]:
         if not line:
             continue
 
-        if "," in line:
-            maybe_name, maybe_score = line.rsplit(",", maxsplit=1)
-        elif ":" in line:
-            maybe_name, maybe_score = line.rsplit(":", maxsplit=1)
+        maybe_name = ""
+        maybe_score = ""
+
+        pipe_parts = [part.strip() for part in line.split("|")]
+        if len(pipe_parts) >= 3 and pipe_parts[0].isdigit():
+            maybe_name = pipe_parts[1]
+            maybe_score = pipe_parts[2]
         else:
-            parts = line.rsplit(" ", maxsplit=1)
-            if len(parts) != 2:
-                continue
-            maybe_name, maybe_score = parts
+            comma_parts = [part.strip() for part in line.split(",")]
+            if len(comma_parts) >= 3 and comma_parts[0].isdigit():
+                maybe_name = comma_parts[1]
+                maybe_score = comma_parts[2]
+            elif "," in line:
+                maybe_name, maybe_score = line.rsplit(",", maxsplit=1)
+            elif ":" in line:
+                maybe_name, maybe_score = line.rsplit(":", maxsplit=1)
+            else:
+                parts = line.rsplit(" ", maxsplit=1)
+                if len(parts) != 2:
+                    continue
+                maybe_name, maybe_score = parts
 
         maybe_name = maybe_name.strip()
         maybe_score = maybe_score.strip()
+
+        placement_prefix = re.match(r"^\s*\d+\s*[\.\)\-:]\s*(.+)$", maybe_name)
+        if placement_prefix:
+            maybe_name = placement_prefix.group(1).strip()
 
         if not maybe_name:
             continue
@@ -1266,13 +1906,17 @@ def home():
         per_game=per_game,
         per_game_map=per_game_map,
         flash_messages=flash_messages,
-        show_admin_controls=True,
+        show_admin_controls=upload_review_enabled(),
         **root_module_context,
     )
 
 
 @app.route("/admin/upload", methods=["GET", "POST"])
 def admin_upload():
+    if not upload_review_enabled():
+        flash("Upload/review flow is currently disabled.", "error")
+        return redirect(url_for("home"))
+
     if request.method == "POST":
         uploaded_file = request.files.get("screenshot")
         if uploaded_file is None or not uploaded_file.filename:
@@ -1324,6 +1968,10 @@ def admin_upload():
 
 @app.route("/scan", methods=["POST"])
 def scan():
+    if not upload_review_enabled():
+        flash("Upload/review flow is currently disabled.", "error")
+        return redirect(url_for("home"))
+
     folder_raw = (request.form.get("folder_path") or "").strip()
     if not folder_raw:
         flash("Provide a folder path.", "error")
@@ -1348,6 +1996,10 @@ def scan():
 
 @app.route("/review/<int:match_id>", methods=["GET", "POST"])
 def review(match_id: int):
+    if not upload_review_enabled():
+        flash("Upload/review flow is currently disabled.", "error")
+        return redirect(url_for("home"))
+
     with db_conn() as conn:
         match = conn.execute("SELECT * FROM matches WHERE id = ?", (match_id,)).fetchone()
         if not match:
@@ -1366,6 +2018,8 @@ def review(match_id: int):
                 return redirect(url_for("home"))
 
             game_name = (request.form.get("game_name") or "").strip()
+            if game_name.lower() in SUPPORTED_GAMES:
+                game_name = game_name.lower()
             higher_is_better = request.form.get("higher_is_better", "1") == "1"
             publish_after_save = action == "save_publish"
             played_at = safe_parse_datetime(request.form.get("played_at")) or match["played_at"]
@@ -1427,6 +2081,36 @@ def review(match_id: int):
             return redirect(url_for("home"))
 
         extracted_scores = json.loads(match["extracted_scores_json"] or "[]")
+        existing_numeric = count_numeric_scores(extracted_scores)
+        extracted_rows_for_compare = [
+            ExtractedScore(
+                player_name=canonicalize_player_name(str(row.get("player_name", "")).strip()),
+                score=row.get("score"),
+                score_status=str(row.get("score_status") or ("numeric" if row.get("score") is not None else "unknown")),
+            )
+            for row in extracted_scores
+            if str(row.get("player_name", "")).strip()
+        ]
+        if len(extracted_scores) < 2 or existing_numeric < len(extracted_scores):
+            fallback_scores = best_extracted_scores_for_image(
+                conn,
+                Path(match["screenshot_path"]),
+                extracted_rows_for_compare,
+            )
+            fallback_numeric = extracted_scores_numeric_count(fallback_scores)
+            if (
+                len(fallback_scores) > len(extracted_scores)
+                or fallback_numeric > existing_numeric
+            ):
+                extracted_scores = [row._asdict() for row in fallback_scores]
+                conn.execute(
+                    "UPDATE matches SET extracted_scores_json = ?, relevance_score = ? WHERE id = ?",
+                    (
+                        json.dumps(extracted_scores),
+                        calc_relevance(match["ocr_text"] or "", fallback_scores),
+                        match_id,
+                    ),
+                )
         existing_game = conn.execute(
             """
             SELECT g.name, g.higher_is_better
@@ -1436,17 +2120,48 @@ def review(match_id: int):
             """,
             (match_id,),
         ).fetchone()
+        screenshot_path = Path(match["screenshot_path"])
+        extracted_score_rows = [
+            ExtractedScore(
+                player_name=canonicalize_player_name(str(row.get("player_name", "")).strip()),
+                score=row.get("score"),
+                score_status=str(row.get("score_status") or ("numeric" if row.get("score") is not None else "unknown")),
+            )
+            for row in extracted_scores
+            if str(row.get("player_name", "")).strip()
+        ]
         if existing_game:
             default_game_name = str(existing_game["name"])
             default_higher_is_better = bool(existing_game["higher_is_better"])
         else:
-            screenshot_path = Path(match["screenshot_path"])
-            parent_name = screenshot_path.parent.name.strip().lower()
-            default_game_name = parent_name if parent_name and not parent_name.startswith("_") else ""
+            default_game_name = infer_supported_game_name(
+                conn,
+                screenshot_path,
+                str(match["ocr_text"] or ""),
+                extracted_score_rows,
+            )
             default_higher_is_better = True
+
+        root_faction_preview: list[dict[str, object]] = []
+        root_faction_preview_confidence: float | None = None
+        if module_enabled("root") and extracted_score_rows:
+            load_root_faction_samples(conn)
+            preview = preview_root_factions_from_scores(
+                conn,
+                Path(match["screenshot_path"]),
+                extracted_score_rows,
+                default_higher_is_better,
+            )
+            if preview is not None:
+                preview_rows, preview_confidence = preview
+                if default_game_name.strip().lower() == "root" or preview_confidence >= 0.30:
+                    root_faction_preview = preview_rows
+                    root_faction_preview_confidence = preview_confidence
+                    if not default_game_name.strip():
+                        default_game_name = "root"
         scores_text = "\n".join(
-            f"{canonicalize_player_name(row['player_name'])},{row['score'] if row['score'] is not None else 'NA'}"
-            for row in extracted_scores
+            f"{index}|{canonicalize_player_name(row['player_name'])}|{row['score'] if row['score'] is not None else 'NA'}"
+            for index, row in enumerate(extracted_scores, start=1)
         )
 
         return render_template(
@@ -1456,6 +2171,9 @@ def review(match_id: int):
             ocr_available=pytesseract is not None,
             default_game_name=default_game_name,
             default_higher_is_better=default_higher_is_better,
+            root_faction_preview=root_faction_preview,
+            root_faction_preview_confidence=root_faction_preview_confidence,
+            supported_games=SUPPORTED_GAMES,
         )
 
 

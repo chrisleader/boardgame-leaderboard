@@ -58,6 +58,14 @@ python app.py
 
 5. Open [http://localhost:8080](http://localhost:8080)
 
+### Upload/review toggle
+
+Upload/review is currently disabled by default. Re-enable when needed:
+
+```bash
+ENABLE_UPLOAD_REVIEW=1 python app.py
+```
+
 ## Module configuration
 
 Set enabled modules via `ENABLED_MODULES` (comma-separated).
@@ -103,11 +111,14 @@ Current `.gitignore` is configured to exclude local/private game assets.
 
 ### Ongoing update flow
 
-1. Start app: `python app.py`
+1. Start app with upload/review enabled: `ENABLE_UPLOAD_REVIEW=1 python app.py`
 2. Open admin upload: [http://localhost:8080/admin/upload](http://localhost:8080/admin/upload)
 3. Upload one screenshot
-4. Review/edit detected game + scores
+4. Review/edit detected game + result rows (`Placement|Player|Score`)
 5. Click **Save + Publish live stats** to rebuild and push static output
+
+The review flow is optimized for `root`, `everdell`, and `dune` screenshots.  
+For ambiguous OCR, keep placement order and use `NA` for unreadable scores.
 
 Alternative CLI workflow:
 
