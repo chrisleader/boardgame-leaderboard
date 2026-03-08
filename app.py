@@ -1105,7 +1105,11 @@ def group_root_player_faction_rows(rows: list[sqlite3.Row]) -> list[dict[str, ob
     for row in rows:
         player_name = str(row["player_name"])
         grouped.setdefault(player_name, []).append(row)
-    return [{"player_name": player_name, "rows": player_rows} for player_name, player_rows in grouped.items()]
+    ordered_player_names = sorted(grouped.keys(), key=lambda name: name.casefold())
+    return [
+        {"player_name": player_name, "rows": grouped[player_name]}
+        for player_name in ordered_player_names
+    ]
 
 
 def group_per_game_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
