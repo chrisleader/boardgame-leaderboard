@@ -59,6 +59,13 @@
       .faction-cell {
         font-weight: 600;
       }
+      .matrix-table th,
+      .matrix-table td {
+        text-align: center;
+      }
+      .matrix-table .faction-cell {
+        text-align: left;
+      }
 
       @media (max-width: 640px) {
         .container { padding: 12px; }
@@ -191,32 +198,42 @@
 
       <h3>Win rate vs each other faction</h3>
       <div class="table-wrap">
-      <table>
+      {% if root_faction_matchup_matrix %}
+      <table class="matrix-table">
         <thead>
           <tr>
             <th>Faction</th>
-            <th>Opponent</th>
-            <th>Games</th>
-            <th>Wins</th>
-            <th>Win Rate</th>
+            {% for column_faction_name in root_faction_matchup_factions %}
+            {% set column_palette = root_faction_palette.get(column_faction_name) %}
+            <th class="faction-cell"{% if column_palette %} style="background:#{{ column_palette['hex'] }}; color:{{ column_palette['text'] }};"{% endif %}>{{ column_faction_name }}</th>
+            {% endfor %}
           </tr>
         </thead>
         <tbody>
-          {% for row in root_faction_matchups %}
+          {% for row in root_faction_matchup_matrix %}
           {% set faction_palette = root_faction_palette.get(row['faction_name']) %}
-          {% set opponent_palette = root_faction_palette.get(row['opponent_faction_name']) %}
           <tr>
             <td class="faction-cell"{% if faction_palette %} style="background:#{{ faction_palette['hex'] }}; color:{{ faction_palette['text'] }};"{% endif %}>{{ row['faction_name'] }}</td>
-            <td class="faction-cell"{% if opponent_palette %} style="background:#{{ opponent_palette['hex'] }}; color:{{ opponent_palette['text'] }};"{% endif %}>{{ row['opponent_faction_name'] }}</td>
-            <td>{{ row['games_against'] }}</td>
-            <td>{{ row['wins'] }}</td>
-            <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+            {% for win_rate in row['cells'] %}
+            <td>
+              {% if win_rate is not none %}
+              {{ '%.1f%%'|format(win_rate * 100) }}
+              {% else %}
+              —
+              {% endif %}
+            </td>
+            {% endfor %}
           </tr>
-          {% else %}
-          <tr><td colspan="5">No Root matchup data yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
+      {% else %}
+      <table>
+        <tbody>
+          <tr><td>No Root matchup data yet.</td></tr>
+        </tbody>
+      </table>
+      {% endif %}
       </div>
 
       <h3>Faction stats by player</h3>
@@ -342,6 +359,9 @@
       }
 
       document.querySelectorAll("table").forEach((table) => {
+        if (table.classList.contains("matrix-table")) {
+          return;
+        }
         const headers = Array.from(table.querySelectorAll("thead th"));
         if (headers.length === 0) {
           return;

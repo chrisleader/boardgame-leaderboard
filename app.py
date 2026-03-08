@@ -1008,6 +1008,33 @@ def root_faction_matchup_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+def build_root_faction_matchup_matrix(
+    rows: list[sqlite3.Row],
+) -> tuple[list[str], list[dict[str, object]]]:
+    factions: set[str] = set()
+    win_rate_map: dict[tuple[str, str], float] = {}
+
+    for row in rows:
+        faction_name = str(row["faction_name"])
+        opponent_faction_name = str(row["opponent_faction_name"])
+        factions.add(faction_name)
+        factions.add(opponent_faction_name)
+        win_rate_map[(faction_name, opponent_faction_name)] = float(row["win_rate"])
+
+    ordered_factions = sorted(factions)
+    matrix_rows: list[dict[str, object]] = []
+    for faction_name in ordered_factions:
+        cells: list[float | None] = []
+        for opponent_faction_name in ordered_factions:
+            if faction_name == opponent_faction_name:
+                cells.append(None)
+                continue
+            cells.append(win_rate_map.get((faction_name, opponent_faction_name)))
+        matrix_rows.append({"faction_name": faction_name, "cells": cells})
+
+    return ordered_factions, matrix_rows
+
+
 def root_player_faction_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     prepare_temp_views(conn)
     return conn.execute(
@@ -1057,6 +1084,9 @@ def home():
         root_faction_share = root_faction_share_rows(conn)
         root_faction_win_rates = root_faction_win_rate_rows(conn)
         root_faction_matchups = root_faction_matchup_rows(conn)
+        root_faction_matchup_factions, root_faction_matchup_matrix = build_root_faction_matchup_matrix(
+            root_faction_matchups
+        )
         root_player_faction_rows_data = root_player_faction_rows(conn)
         root_player_faction_groups = group_root_player_faction_rows(root_player_faction_rows_data)
         root_faction_palette_map = root_faction_palette(conn)
@@ -1068,7 +1098,8 @@ def home():
         per_game_groups=per_game_groups,
         root_faction_share=root_faction_share,
         root_faction_win_rates=root_faction_win_rates,
-        root_faction_matchups=root_faction_matchups,
+        root_faction_matchup_factions=root_faction_matchup_factions,
+        root_faction_matchup_matrix=root_faction_matchup_matrix,
         root_player_faction_groups=root_player_faction_groups,
         root_faction_palette=root_faction_palette_map,
     )
