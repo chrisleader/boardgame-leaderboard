@@ -38,8 +38,7 @@
       }
       table {
         border-collapse: collapse;
-        width: 100%;
-        min-width: 580px;
+        width: max-content;
       }
       th, td {
         border: 1px solid #e5e7eb;
@@ -73,7 +72,6 @@
                   <th>Games</th>
                   <th>Wins</th>
                   <th>Win Rate</th>
-                  <th>Placement Pts</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,10 +81,9 @@
                   <td>{{ row['games_played'] }}</td>
                   <td>{{ row['wins'] }}</td>
                   <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-                  <td>{{ row['placement_points'] }}</td>
                 </tr>
                 {% else %}
-                <tr><td colspan="5">No confirmed game results yet.</td></tr>
+                <tr><td colspan="4">No confirmed game results yet.</td></tr>
                 {% endfor %}
               </tbody>
             </table>
