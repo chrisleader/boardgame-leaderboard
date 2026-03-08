@@ -11,6 +11,7 @@ It is designed for mixed screenshot sources (you + friends), so it does **not** 
 - Heuristic relevance scoring to find likely result screenshots
 - Manual review/confirmation flow for each candidate
 - SQLite-backed leaderboard with wins, placement points, and win-share metrics
+- Root faction analytics from color-sampled end-screen bars
 - Static export of the homepage to `docs/index.html`
 - GitHub Pages workflow that publishes the static page on push to `main`
 
@@ -62,6 +63,13 @@ This repo includes:
    - `./update_and_publish.sh "Add new game result"`
 4. GitHub Pages auto-refreshes from the workflow.
 
+### Root faction colors
+
+- Baseline file: `root_faction_colors.csv`
+- Columns: `Faction`, `Color Sample 1`, `Color Sample 2`
+- Use 6-char RGB hex values (no `#` required), e.g. `11823E`
+- On save/rebuild, Root faction assignments are auto-detected from screenshot bar colors.
+
 ### One-command publisher
 
 - Script: `update_and_publish.sh`
@@ -69,7 +77,7 @@ This repo includes:
 - Custom commit message: `./update_and_publish.sh "Add root game from 2026-03-08"`
 - The script will:
   - build `docs/index.html` from local `leaderboard.db`
-  - stage `screenshots/` and `docs/index.html`
+  - stage `screenshots/`, `docs/index.html`, and `root_faction_colors.csv`
   - commit and push to `main`
 
 ## Workflow
@@ -79,6 +87,7 @@ This repo includes:
 3. Confirm game name + score lines (`Player,Score`).
    - For non-numeric dominance/coalition result markers, use `Player,NA`.
 4. Save result to update leaderboard.
+   - For Root matches, faction colors are auto-captured and included in Root faction breakdown tables.
 
 ## Notes
 

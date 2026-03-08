@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import colorsys
+import csv
+import itertools
 import json
 import os
 import re
@@ -20,11 +23,17 @@ except Exception:  # pragma: no cover
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "leaderboard.db"
+ROOT_FACTION_COLORS_PATH = BASE_DIR / "root_faction_colors.csv"
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".heic"}
 SCORE_LINE_RE = re.compile(r"^\s*([A-Za-z][A-Za-z0-9 _\-\.]{1,30}?)\s+(\d{1,5})\s*$")
 DATE_RE = re.compile(r"(\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2})")
 UNKNOWN_SCORE_TOKENS = {"na", "n/a", "?", "x", "icon", "dom", "dominance"}
+ROOT_SLOT_X_RATIOS = {
+    3: [0.27, 0.58, 0.84],
+    4: [0.26, 0.50, 0.67, 0.84],
+}
+ROOT_SLOT_Y_BANDS = [(0.74, 0.81), (0.75, 0.82), (0.76, 0.83)]
 PLAYER_ALIASES = {
     "migidoes": "hypersundays",
 }
@@ -87,6 +96,42 @@ def init_db() -> None:
                 FOREIGN KEY (player_id) REFERENCES players(id),
                 UNIQUE (match_id, player_id)
             );
+
+            CREATE TABLE IF NOT EXISTS factions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                game_name TEXT NOT NULL,
+                name TEXT NOT NULL,
+                UNIQUE (game_name, name)
+            );
+
+            CREATE TABLE IF NOT EXISTS faction_color_samples (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                faction_id INTEGER NOT NULL,
+                sample_name TEXT NOT NULL,
+                color_hex TEXT NOT NULL,
+                r INTEGER NOT NULL,
+                g INTEGER NOT NULL,
+                b INTEGER NOT NULL,
+                FOREIGN KEY (faction_id) REFERENCES factions(id) ON DELETE CASCADE,
+                UNIQUE (faction_id, sample_name)
+            );
+
+            CREATE TABLE IF NOT EXISTS match_player_factions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                faction_id INTEGER NOT NULL,
+                source TEXT NOT NULL DEFAULT 'auto_color',
+                confidence REAL NOT NULL DEFAULT 0,
+                sampled_r INTEGER,
+                sampled_g INTEGER,
+                sampled_b INTEGER,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+                FOREIGN KEY (player_id) REFERENCES players(id),
+                FOREIGN KEY (faction_id) REFERENCES factions(id),
+                UNIQUE (match_id, player_id)
+            );
             """
         )
         columns = {
@@ -135,6 +180,7 @@ def init_db() -> None:
                 DROP TABLE match_scores_old;
                 """
             )
+        load_root_faction_samples(conn)
 
 
 def safe_parse_datetime(raw_value: str | None) -> str | None:
@@ -294,6 +340,330 @@ def ensure_player(conn: sqlite3.Connection, name: str) -> int:
 
     cursor = conn.execute("INSERT INTO players (name) VALUES (?)", (canonical_name,))
     return int(cursor.lastrowid)
+
+
+def parse_hex_color(raw_value: str) -> tuple[int, int, int] | None:
+    cleaned = (raw_value or "").strip().lstrip("#")
+    if len(cleaned) != 6 or not re.fullmatch(r"[0-9a-fA-F]{6}", cleaned):
+        return None
+    return tuple(int(cleaned[index : index + 2], 16) for index in (0, 2, 4))
+
+
+def load_root_faction_samples(conn: sqlite3.Connection) -> None:
+    if not ROOT_FACTION_COLORS_PATH.exists():
+        return
+
+    with ROOT_FACTION_COLORS_PATH.open(newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            faction_name = (row.get("Faction") or "").strip()
+            if not faction_name:
+                continue
+
+            faction_row = conn.execute(
+                "SELECT id FROM factions WHERE game_name = 'root' AND name = ?",
+                (faction_name,),
+            ).fetchone()
+            if faction_row:
+                faction_id = int(faction_row["id"])
+            else:
+                faction_id = int(
+                    conn.execute(
+                        "INSERT INTO factions (game_name, name) VALUES ('root', ?)",
+                        (faction_name,),
+                    ).lastrowid
+                )
+
+            for sample_number, column_name in enumerate(("Color Sample 1", "Color Sample 2"), start=1):
+                parsed = parse_hex_color(row.get(column_name) or "")
+                if parsed is None:
+                    continue
+                sample_name = f"sample_{sample_number}"
+                color_hex = "".join(f"{value:02X}" for value in parsed)
+                conn.execute(
+                    """
+                    INSERT INTO faction_color_samples (faction_id, sample_name, color_hex, r, g, b)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(faction_id, sample_name) DO UPDATE SET
+                        color_hex = excluded.color_hex,
+                        r = excluded.r,
+                        g = excluded.g,
+                        b = excluded.b
+                    """,
+                    (faction_id, sample_name, color_hex, parsed[0], parsed[1], parsed[2]),
+                )
+
+
+def root_faction_samples(conn: sqlite3.Connection) -> dict[str, list[tuple[int, int, int]]]:
+    rows = conn.execute(
+        """
+        SELECT f.name AS faction_name, s.r, s.g, s.b
+        FROM factions f
+        JOIN faction_color_samples s ON s.faction_id = f.id
+        WHERE f.game_name = 'root'
+        ORDER BY f.name ASC, s.sample_name ASC
+        """
+    ).fetchall()
+    grouped: dict[str, list[tuple[int, int, int]]] = {}
+    for row in rows:
+        grouped.setdefault(row["faction_name"], []).append((row["r"], row["g"], row["b"]))
+    return grouped
+
+
+def median_int(values: list[int]) -> int:
+    if not values:
+        return 0
+    ordered = sorted(values)
+    midpoint = len(ordered) // 2
+    if len(ordered) % 2 == 1:
+        return ordered[midpoint]
+    return int(round((ordered[midpoint - 1] + ordered[midpoint]) / 2))
+
+
+def root_slot_ratios(player_count: int) -> list[float]:
+    if player_count in ROOT_SLOT_X_RATIOS:
+        return ROOT_SLOT_X_RATIOS[player_count]
+    if player_count <= 1:
+        return [0.5]
+    start = 0.27
+    end = 0.84
+    gap = (end - start) / (player_count - 1)
+    return [start + index * gap for index in range(player_count)]
+
+
+def extract_root_slot_colors(
+    image_path: Path,
+    player_count: int,
+    y_start_ratio: float,
+    y_end_ratio: float,
+) -> list[tuple[int, int, int]]:
+    with Image.open(image_path) as image:
+        rgb_image = image.convert("RGB")
+        width, height = rgb_image.size
+        colors: list[tuple[int, int, int]] = []
+        for slot_ratio in root_slot_ratios(player_count):
+            center_x = int(slot_ratio * width)
+            span_x = max(12, int(0.045 * width))
+            left = max(0, center_x - span_x)
+            right = min(width, center_x + span_x)
+            top = max(0, int(y_start_ratio * height))
+            bottom = min(height, int(y_end_ratio * height))
+
+            patch = rgb_image.crop((left, top, right, bottom))
+            patch_pixels = list(patch.getdata())
+            filtered_pixels: list[tuple[int, int, int]] = []
+            for red, green, blue in patch_pixels:
+                channel_max = max(red, green, blue)
+                channel_min = min(red, green, blue)
+                if channel_max <= 35 or channel_max >= 245:
+                    continue
+                saturation = (channel_max - channel_min) / max(channel_max, 1)
+                if saturation <= 0.18:
+                    continue
+                filtered_pixels.append((red, green, blue))
+            usable = filtered_pixels if len(filtered_pixels) >= max(20, len(patch_pixels) // 8) else patch_pixels
+            reds = [pixel[0] for pixel in usable]
+            greens = [pixel[1] for pixel in usable]
+            blues = [pixel[2] for pixel in usable]
+            colors.append((median_int(reds), median_int(greens), median_int(blues)))
+        return colors
+
+
+def root_hsv_distance(left_rgb: tuple[int, int, int], right_rgb: tuple[int, int, int]) -> float:
+    left_hsv = colorsys.rgb_to_hsv(*(channel / 255.0 for channel in left_rgb))
+    right_hsv = colorsys.rgb_to_hsv(*(channel / 255.0 for channel in right_rgb))
+    hue_distance = abs(left_hsv[0] - right_hsv[0])
+    hue_distance = min(hue_distance, 1.0 - hue_distance)
+    return (
+        2.8 * hue_distance
+        + 0.9 * abs(left_hsv[1] - right_hsv[1])
+        + 0.55 * abs(left_hsv[2] - right_hsv[2])
+    )
+
+
+def assign_root_factions(
+    slot_colors: list[tuple[int, int, int]],
+    faction_samples_map: dict[str, list[tuple[int, int, int]]],
+) -> tuple[list[tuple[str, float]], float] | None:
+    faction_names = sorted(faction_samples_map)
+    player_count = len(slot_colors)
+    if player_count == 0 or len(faction_names) < player_count:
+        return None
+
+    distance_rows: list[dict[str, float]] = []
+    for slot_color in slot_colors:
+        row = {}
+        for faction_name in faction_names:
+            row[faction_name] = min(
+                root_hsv_distance(slot_color, sample_rgb)
+                for sample_rgb in faction_samples_map[faction_name]
+            )
+        distance_rows.append(row)
+
+    best_score: float | None = None
+    best_permutation: tuple[str, ...] | None = None
+    second_best_score: float | None = None
+    for permutation in itertools.permutations(faction_names, player_count):
+        score = sum(distance_rows[index][faction_name] for index, faction_name in enumerate(permutation))
+        if best_score is None or score < best_score:
+            if best_score is not None:
+                second_best_score = best_score
+            best_score = score
+            best_permutation = permutation
+            continue
+        if second_best_score is None or score < second_best_score:
+            second_best_score = score
+
+    if best_permutation is None or best_score is None:
+        return None
+
+    comparison_score = second_best_score if second_best_score is not None else best_score + 1
+    global_confidence = max(
+        0.0,
+        min(1.0, (comparison_score - best_score) / max(comparison_score, 1e-6)),
+    )
+
+    assignments: list[tuple[str, float]] = []
+    for index, faction_name in enumerate(best_permutation):
+        sorted_distances = sorted(distance_rows[index].values())
+        best_distance = sorted_distances[0]
+        second_distance = sorted_distances[1] if len(sorted_distances) > 1 else best_distance + 1
+        slot_confidence = max(
+            0.0,
+            min(1.0, (second_distance - best_distance) / max(second_distance, 1e-6)),
+        )
+        confidence = max(0.0, min(1.0, 0.5 * slot_confidence + 0.5 * global_confidence))
+        assignments.append((faction_name, confidence))
+
+    return assignments, global_confidence
+
+
+def infer_root_factions_for_match(conn: sqlite3.Connection, match_id: int) -> int:
+    match_row = conn.execute(
+        """
+        SELECT m.id, m.screenshot_path
+        FROM matches m
+        JOIN games g ON g.id = m.game_id
+        WHERE m.id = ? AND m.relevant = 1 AND g.name = 'root'
+        """,
+        (match_id,),
+    ).fetchone()
+    if not match_row:
+        return 0
+
+    image_path = Path(match_row["screenshot_path"])
+    if not image_path.exists():
+        return 0
+
+    participants = conn.execute(
+        """
+        SELECT ms.player_id
+        FROM match_scores ms
+        WHERE ms.match_id = ?
+        ORDER BY
+            CASE WHEN ms.placement IS NULL THEN 999 ELSE ms.placement END ASC,
+            CASE WHEN ms.score IS NULL THEN -999999 ELSE ms.score END DESC,
+            ms.player_id ASC
+        """,
+        (match_id,),
+    ).fetchall()
+    player_count = len(participants)
+    if player_count < 2:
+        return 0
+
+    faction_samples_map = root_faction_samples(conn)
+    if len(faction_samples_map) < player_count:
+        return 0
+
+    best_assignment: list[tuple[str, float]] | None = None
+    best_slot_colors: list[tuple[int, int, int]] | None = None
+    best_confidence = -1.0
+    for y_start_ratio, y_end_ratio in ROOT_SLOT_Y_BANDS:
+        slot_colors = extract_root_slot_colors(image_path, player_count, y_start_ratio, y_end_ratio)
+        assigned = assign_root_factions(slot_colors, faction_samples_map)
+        if assigned is None:
+            continue
+        assignments, global_confidence = assigned
+        if global_confidence > best_confidence:
+            best_confidence = global_confidence
+            best_assignment = assignments
+            best_slot_colors = slot_colors
+
+    if best_assignment is None or best_slot_colors is None:
+        return 0
+
+    faction_id_rows = conn.execute(
+        "SELECT id, name FROM factions WHERE game_name = 'root'"
+    ).fetchall()
+    faction_id_by_name = {row["name"]: int(row["id"]) for row in faction_id_rows}
+
+    updated = 0
+    updated_at = datetime.utcnow().isoformat()
+    for participant_row, (faction_name, confidence), sampled_rgb in zip(
+        participants, best_assignment, best_slot_colors
+    ):
+        player_id = int(participant_row["player_id"])
+        existing = conn.execute(
+            "SELECT source FROM match_player_factions WHERE match_id = ? AND player_id = ?",
+            (match_id, player_id),
+        ).fetchone()
+        if existing and existing["source"] == "manual":
+            continue
+        faction_id = faction_id_by_name.get(faction_name)
+        if faction_id is None:
+            continue
+        conn.execute(
+            """
+            INSERT INTO match_player_factions (
+                match_id,
+                player_id,
+                faction_id,
+                source,
+                confidence,
+                sampled_r,
+                sampled_g,
+                sampled_b,
+                updated_at
+            )
+            VALUES (?, ?, ?, 'auto_color', ?, ?, ?, ?, ?)
+            ON CONFLICT(match_id, player_id) DO UPDATE SET
+                faction_id = excluded.faction_id,
+                source = excluded.source,
+                confidence = excluded.confidence,
+                sampled_r = excluded.sampled_r,
+                sampled_g = excluded.sampled_g,
+                sampled_b = excluded.sampled_b,
+                updated_at = excluded.updated_at
+            """,
+            (
+                match_id,
+                player_id,
+                faction_id,
+                confidence,
+                sampled_rgb[0],
+                sampled_rgb[1],
+                sampled_rgb[2],
+                updated_at,
+            ),
+        )
+        updated += 1
+    return updated
+
+
+def backfill_root_factions(conn: sqlite3.Connection) -> int:
+    updated = 0
+    match_rows = conn.execute(
+        """
+        SELECT m.id
+        FROM matches m
+        JOIN games g ON g.id = m.game_id
+        WHERE m.relevant = 1 AND g.name = 'root'
+        ORDER BY m.id ASC
+        """
+    ).fetchall()
+    for row in match_rows:
+        updated += infer_root_factions_for_match(conn, int(row["id"]))
+    return updated
 
 
 def parse_scores_text(raw_scores: str) -> list[ExtractedScore]:
@@ -479,6 +849,106 @@ def per_game_win_rates(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+def root_faction_share_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        """
+        WITH root_matches AS (
+            SELECT m.id
+            FROM matches m
+            JOIN games g ON g.id = m.game_id
+            WHERE m.relevant = 1 AND g.name = 'root'
+        ),
+        total AS (
+            SELECT COUNT(*) AS total_games
+            FROM root_matches
+        ),
+        usage AS (
+            SELECT
+                f.name AS faction_name,
+                COUNT(DISTINCT mpf.match_id) AS games_with_faction
+            FROM match_player_factions mpf
+            JOIN factions f ON f.id = mpf.faction_id
+            JOIN root_matches rm ON rm.id = mpf.match_id
+            WHERE f.game_name = 'root'
+            GROUP BY f.name
+        )
+        SELECT
+            usage.faction_name,
+            usage.games_with_faction,
+            total.total_games,
+            CASE
+                WHEN total.total_games > 0 THEN usage.games_with_faction * 1.0 / total.total_games
+                ELSE 0
+            END AS game_share
+        FROM usage
+        JOIN total
+        ORDER BY game_share DESC, games_with_faction DESC, faction_name ASC
+        """
+    ).fetchall()
+
+
+def root_faction_win_rate_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    prepare_temp_views(conn)
+    return conn.execute(
+        """
+        SELECT
+            f.name AS faction_name,
+            COUNT(*) AS games_played,
+            COALESCE(SUM(mw.is_winner), 0) AS wins,
+            COALESCE(SUM(mw.is_winner), 0) * 1.0 / COUNT(*) AS win_rate
+        FROM match_player_factions mpf
+        JOIN factions f ON f.id = mpf.faction_id AND f.game_name = 'root'
+        JOIN matches m ON m.id = mpf.match_id AND m.relevant = 1
+        JOIN games g ON g.id = m.game_id AND g.name = 'root'
+        LEFT JOIN match_winners mw ON mw.match_id = mpf.match_id AND mw.player_id = mpf.player_id
+        GROUP BY f.name
+        ORDER BY win_rate DESC, wins DESC, games_played DESC, faction_name ASC
+        """
+    ).fetchall()
+
+
+def root_player_top_factions(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    prepare_temp_views(conn)
+    return conn.execute(
+        """
+        WITH stats AS (
+            SELECT
+                p.id AS player_id,
+                p.name AS player_name,
+                f.name AS faction_name,
+                COUNT(*) AS games_played,
+                COALESCE(SUM(mw.is_winner), 0) AS wins,
+                COALESCE(SUM(mw.is_winner), 0) * 1.0 / COUNT(*) AS win_rate
+            FROM match_player_factions mpf
+            JOIN players p ON p.id = mpf.player_id
+            JOIN factions f ON f.id = mpf.faction_id AND f.game_name = 'root'
+            JOIN matches m ON m.id = mpf.match_id AND m.relevant = 1
+            JOIN games g ON g.id = m.game_id AND g.name = 'root'
+            LEFT JOIN match_winners mw ON mw.match_id = mpf.match_id AND mw.player_id = mpf.player_id
+            GROUP BY p.id, p.name, f.name
+        ),
+        ranked AS (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY player_id
+                    ORDER BY games_played DESC, win_rate DESC, wins DESC, faction_name ASC
+                ) AS row_rank
+            FROM stats
+        )
+        SELECT
+            player_name,
+            faction_name,
+            games_played,
+            wins,
+            win_rate
+        FROM ranked
+        WHERE row_rank = 1
+        ORDER BY player_name ASC
+        """
+    ).fetchall()
+
+
 def group_per_game_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
     grouped: dict[str, list[sqlite3.Row]] = {}
     for row in rows:
@@ -490,15 +960,23 @@ def group_per_game_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
 @app.route("/")
 def home():
     with db_conn() as conn:
+        load_root_faction_samples(conn)
+        backfill_root_factions(conn)
         leaderboard = leaderboard_rows(conn)
         per_game = per_game_win_rates(conn)
         per_game_groups = group_per_game_rows(per_game)
+        root_faction_share = root_faction_share_rows(conn)
+        root_faction_win_rates = root_faction_win_rate_rows(conn)
+        root_player_factions = root_player_top_factions(conn)
 
     return render_template(
         "home.html",
         leaderboard=leaderboard,
         per_game=per_game,
         per_game_groups=per_game_groups,
+        root_faction_share=root_faction_share,
+        root_faction_win_rates=root_faction_win_rates,
+        root_player_factions=root_player_factions,
     )
 
 
@@ -593,6 +1071,9 @@ def review(match_id: int):
                     match_id,
                 ),
             )
+            if game_name.strip().lower() == "root":
+                load_root_faction_samples(conn)
+                infer_root_factions_for_match(conn, match_id)
             flash("Result saved.", "success")
             return redirect(url_for("home"))
 

@@ -15,9 +15,14 @@ OUTPUT_FILE = OUTPUT_DIR / "index.html"
 def build_static_homepage() -> Path:
     leaderboard_app.init_db()
     with leaderboard_app.db_conn() as conn:
+        leaderboard_app.load_root_faction_samples(conn)
+        leaderboard_app.backfill_root_factions(conn)
         leaderboard = leaderboard_app.leaderboard_rows(conn)
         per_game = leaderboard_app.per_game_win_rates(conn)
         per_game_groups = leaderboard_app.group_per_game_rows(per_game)
+        root_faction_share = leaderboard_app.root_faction_share_rows(conn)
+        root_faction_win_rates = leaderboard_app.root_faction_win_rate_rows(conn)
+        root_player_factions = leaderboard_app.root_player_top_factions(conn)
 
     with leaderboard_app.app.app_context():
         html = render_template(
@@ -25,6 +30,9 @@ def build_static_homepage() -> Path:
             leaderboard=leaderboard,
             per_game=per_game,
             per_game_groups=per_game_groups,
+            root_faction_share=root_faction_share,
+            root_faction_win_rates=root_faction_win_rates,
+            root_player_factions=root_player_factions,
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

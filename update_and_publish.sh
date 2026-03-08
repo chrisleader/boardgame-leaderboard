@@ -15,7 +15,7 @@ echo "Building static homepage from local leaderboard data..."
 python3 build_static_site.py
 
 echo "Staging screenshot and static page updates..."
-git add screenshots docs/index.html
+git add screenshots docs/index.html root_faction_colors.csv
 
 if git diff --cached --quiet; then
   echo "No staged changes found. Nothing to publish."
