@@ -479,26 +479,16 @@ def per_game_win_rates(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
-def group_per_game_rows(rows: list[sqlite3.Row]) -> list[dict[str, object]]:
-    grouped: dict[str, list[sqlite3.Row]] = {}
-    for row in rows:
-        game_name = str(row["game_name"])
-        grouped.setdefault(game_name, []).append(row)
-    return [{"game_name": game_name, "rows": game_rows} for game_name, game_rows in grouped.items()]
-
-
 @app.route("/")
 def home():
     with db_conn() as conn:
         leaderboard = leaderboard_rows(conn)
         per_game = per_game_win_rates(conn)
-        per_game_groups = group_per_game_rows(per_game)
 
     return render_template(
         "home.html",
         leaderboard=leaderboard,
         per_game=per_game,
-        per_game_groups=per_game_groups,
     )
 
 

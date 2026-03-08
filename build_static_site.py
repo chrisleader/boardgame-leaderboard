@@ -17,14 +17,12 @@ def build_static_homepage() -> Path:
     with leaderboard_app.db_conn() as conn:
         leaderboard = leaderboard_app.leaderboard_rows(conn)
         per_game = leaderboard_app.per_game_win_rates(conn)
-        per_game_groups = leaderboard_app.group_per_game_rows(per_game)
 
     with leaderboard_app.app.app_context():
         html = render_template(
             "home.html",
             leaderboard=leaderboard,
             per_game=per_game,
-            per_game_groups=per_game_groups,
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
