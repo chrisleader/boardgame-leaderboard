@@ -238,7 +238,7 @@
           <tbody>
             {% for row in dune_rows %}
             <tr>
-              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['player_name'] }}{% if loop.index == 1 %} 🥇{% elif loop.index == 2 %} 🥈{% elif loop.index == 3 %} 🥉{% endif %}</td>
               <td>{{ row['games_played'] }}</td>
               <td>{{ row['wins'] }}</td>
               <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
@@ -268,7 +268,7 @@
           <tbody>
             {% for row in everdell_rows %}
             <tr>
-              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['player_name'] }}{% if loop.index == 1 %} 🥇{% elif loop.index == 2 %} 🥈{% elif loop.index == 3 %} 🥉{% endif %}</td>
               <td>{{ row['games_played'] }}</td>
               <td>{{ row['wins'] }}</td>
               <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
@@ -298,7 +298,7 @@
           <tbody>
             {% for row in root_rows %}
             <tr>
-              <td>{{ row['player_name'] }}</td>
+              <td>{{ row['player_name'] }}{% if loop.index == 1 %} 🥇{% elif loop.index == 2 %} 🥈{% elif loop.index == 3 %} 🥉{% endif %}</td>
               <td>{{ row['games_played'] }}</td>
               <td>{{ row['wins'] }}</td>
               <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
