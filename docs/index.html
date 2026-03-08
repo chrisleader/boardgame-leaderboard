@@ -22,6 +22,11 @@
         font-size: clamp(1.5rem, 4vw, 2rem);
       }
       h2 { margin: 0 0 8px; font-size: clamp(1.1rem, 3vw, 1.4rem); }
+      h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        color: #111827;
+      }
       p { margin: 0 0 12px; color: #4b5563; }
       .card {
         border: 1px solid #e5e7eb;
@@ -30,7 +35,26 @@
         background: #fff;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
       }
-      .stack { display: grid; gap: 12px; }
+      .main-grid {
+        display: grid;
+        gap: 12px;
+        align-items: start;
+      }
+      .leaderboard-card {
+        justify-self: start;
+        width: fit-content;
+        max-width: 100%;
+      }
+      .games-stack {
+        display: grid;
+        gap: 12px;
+      }
+      .game-section {
+        border: 1px solid #f0f1f4;
+        border-radius: 10px;
+        padding: 10px;
+        background: #fcfcfd;
+      }
       .table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -48,11 +72,66 @@
         white-space: nowrap;
       }
       th { background: #f9fafb; }
+      .num { text-align: right; }
+      tbody tr:nth-child(even) { background: #fafafa; }
+      .per-game-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
 
-      @media (max-width: 640px) {
+      @media (min-width: 1000px) {
+        .main-grid {
+          grid-template-columns: minmax(320px, max-content) 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
         .container { padding: 12px; }
         .card { padding: 12px; border-radius: 10px; }
         th, td { font-size: 0.9rem; padding: 7px 8px; }
+        .main-grid { grid-template-columns: 1fr; }
+        .leaderboard-card { width: 100%; }
+
+        .leaderboard-table {
+          width: 100%;
+          min-width: 0;
+        }
+        .leaderboard-table thead {
+          display: none;
+        }
+        .leaderboard-table tbody,
+        .leaderboard-table tr,
+        .leaderboard-table td {
+          display: block;
+          width: 100%;
+        }
+        .leaderboard-table tbody tr {
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
+          margin-bottom: 8px;
+          padding: 8px 10px;
+          background: #fff;
+        }
+        .leaderboard-table tbody tr:nth-child(even) {
+          background: #fff;
+        }
+        .leaderboard-table td {
+          border: 0;
+          padding: 4px 0;
+          white-space: normal;
+          text-align: left;
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 10px;
+        }
+        .leaderboard-table td::before {
+          content: attr(data-label);
+          font-weight: 600;
+          color: #4b5563;
+          flex-shrink: 0;
+        }
       }
     </style>
   </head>
@@ -60,55 +139,55 @@
     <div class="container">
       <h1>Board Game Leaderboard</h1>
 
-      <div class="stack">
-        <div class="card">
+      <div class="main-grid">
+        <div class="card leaderboard-card">
           <h2>Leaderboard</h2>
           <p>Ranked by overall win share (wins / games played).</p>
           <div class="table-wrap">
-            <table>
+            <table class="leaderboard-table">
               <thead>
                 <tr>
                   <th>Player</th>
-                  <th>Games</th>
-                  <th>Wins</th>
-                  <th>Win Rate</th>
+                  <th class="num">Games</th>
+                  <th class="num">Wins</th>
+                  <th class="num">Win Rate</th>
                 </tr>
               </thead>
               <tbody>
                 
                 <tr>
-                  <td>Rahemo</td>
-                  <td>74</td>
-                  <td>40</td>
-                  <td>54.1%</td>
+                  <td data-label="Player">Rahemo</td>
+                  <td class="num" data-label="Games">74</td>
+                  <td class="num" data-label="Wins">40</td>
+                  <td class="num" data-label="Win Rate">54.1%</td>
                 </tr>
                 
                 <tr>
-                  <td>Saverio</td>
-                  <td>18</td>
-                  <td>5</td>
-                  <td>27.8%</td>
+                  <td data-label="Player">Saverio</td>
+                  <td class="num" data-label="Games">18</td>
+                  <td class="num" data-label="Wins">5</td>
+                  <td class="num" data-label="Win Rate">27.8%</td>
                 </tr>
                 
                 <tr>
-                  <td>chrisleader</td>
-                  <td>76</td>
-                  <td>17</td>
-                  <td>22.4%</td>
+                  <td data-label="Player">chrisleader</td>
+                  <td class="num" data-label="Games">76</td>
+                  <td class="num" data-label="Wins">17</td>
+                  <td class="num" data-label="Win Rate">22.4%</td>
                 </tr>
                 
                 <tr>
-                  <td>rpanlilio</td>
-                  <td>74</td>
-                  <td>10</td>
-                  <td>13.5%</td>
+                  <td data-label="Player">rpanlilio</td>
+                  <td class="num" data-label="Games">74</td>
+                  <td class="num" data-label="Wins">10</td>
+                  <td class="num" data-label="Win Rate">13.5%</td>
                 </tr>
                 
                 <tr>
-                  <td>hypersundays</td>
-                  <td>60</td>
-                  <td>5</td>
-                  <td>8.3%</td>
+                  <td data-label="Player">hypersundays</td>
+                  <td class="num" data-label="Games">60</td>
+                  <td class="num" data-label="Wins">5</td>
+                  <td class="num" data-label="Win Rate">8.3%</td>
                 </tr>
                 
               </tbody>
@@ -118,125 +197,156 @@
 
         <div class="card">
           <h2>Per-game win rate</h2>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Player</th>
-                  <th>Games</th>
-                  <th>Wins</th>
-                  <th>Win Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                
-                <tr>
-                  <td>dune</td>
-                  <td>Rahemo</td>
-                  <td>3</td>
-                  <td>2</td>
-                  <td>66.7%</td>
-                </tr>
-                
-                <tr>
-                  <td>dune</td>
-                  <td>chrisleader</td>
-                  <td>3</td>
-                  <td>1</td>
-                  <td>33.3%</td>
-                </tr>
-                
-                <tr>
-                  <td>dune</td>
-                  <td>hypersundays</td>
-                  <td>3</td>
-                  <td>1</td>
-                  <td>33.3%</td>
-                </tr>
-                
-                <tr>
-                  <td>dune</td>
-                  <td>rpanlilio</td>
-                  <td>3</td>
-                  <td>0</td>
-                  <td>0.0%</td>
-                </tr>
-                
-                <tr>
-                  <td>everdell</td>
-                  <td>Rahemo</td>
-                  <td>13</td>
-                  <td>5</td>
-                  <td>38.5%</td>
-                </tr>
-                
-                <tr>
-                  <td>everdell</td>
-                  <td>rpanlilio</td>
-                  <td>12</td>
-                  <td>3</td>
-                  <td>25.0%</td>
-                </tr>
-                
-                <tr>
-                  <td>everdell</td>
-                  <td>chrisleader</td>
-                  <td>13</td>
-                  <td>3</td>
-                  <td>23.1%</td>
-                </tr>
-                
-                <tr>
-                  <td>everdell</td>
-                  <td>hypersundays</td>
-                  <td>13</td>
-                  <td>2</td>
-                  <td>15.4%</td>
-                </tr>
-                
-                <tr>
-                  <td>root</td>
-                  <td>Rahemo</td>
-                  <td>58</td>
-                  <td>33</td>
-                  <td>56.9%</td>
-                </tr>
-                
-                <tr>
-                  <td>root</td>
-                  <td>Saverio</td>
-                  <td>18</td>
-                  <td>5</td>
-                  <td>27.8%</td>
-                </tr>
-                
-                <tr>
-                  <td>root</td>
-                  <td>chrisleader</td>
-                  <td>60</td>
-                  <td>13</td>
-                  <td>21.7%</td>
-                </tr>
-                
-                <tr>
-                  <td>root</td>
-                  <td>rpanlilio</td>
-                  <td>59</td>
-                  <td>7</td>
-                  <td>11.9%</td>
-                </tr>
-                
-                <tr>
-                  <td>root</td>
-                  <td>hypersundays</td>
-                  <td>44</td>
-                  <td>2</td>
-                  <td>4.5%</td>
-                </tr>
-                
-              </tbody>
-            </table>
+          <div class="games-stack">
+            
+            <div class="game-section">
+              <h3>Dune</h3>
+              <div class="table-wrap">
+                <table class="per-game-table">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th class="num">Games</th>
+                      <th class="num">Wins</th>
+                      <th class="num">Win Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                    <tr>
+                      <td>Rahemo</td>
+                      <td class="num">3</td>
+                      <td class="num">2</td>
+                      <td class="num">66.7%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>chrisleader</td>
+                      <td class="num">3</td>
+                      <td class="num">1</td>
+                      <td class="num">33.3%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>hypersundays</td>
+                      <td class="num">3</td>
+                      <td class="num">1</td>
+                      <td class="num">33.3%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>rpanlilio</td>
+                      <td class="num">3</td>
+                      <td class="num">0</td>
+                      <td class="num">0.0%</td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="game-section">
+              <h3>Everdell</h3>
+              <div class="table-wrap">
+                <table class="per-game-table">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th class="num">Games</th>
+                      <th class="num">Wins</th>
+                      <th class="num">Win Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                    <tr>
+                      <td>Rahemo</td>
+                      <td class="num">13</td>
+                      <td class="num">5</td>
+                      <td class="num">38.5%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>rpanlilio</td>
+                      <td class="num">12</td>
+                      <td class="num">3</td>
+                      <td class="num">25.0%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>chrisleader</td>
+                      <td class="num">13</td>
+                      <td class="num">3</td>
+                      <td class="num">23.1%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>hypersundays</td>
+                      <td class="num">13</td>
+                      <td class="num">2</td>
+                      <td class="num">15.4%</td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="game-section">
+              <h3>Root</h3>
+              <div class="table-wrap">
+                <table class="per-game-table">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th class="num">Games</th>
+                      <th class="num">Wins</th>
+                      <th class="num">Win Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                    <tr>
+                      <td>Rahemo</td>
+                      <td class="num">58</td>
+                      <td class="num">33</td>
+                      <td class="num">56.9%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>Saverio</td>
+                      <td class="num">18</td>
+                      <td class="num">5</td>
+                      <td class="num">27.8%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>chrisleader</td>
+                      <td class="num">60</td>
+                      <td class="num">13</td>
+                      <td class="num">21.7%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>rpanlilio</td>
+                      <td class="num">59</td>
+                      <td class="num">7</td>
+                      <td class="num">11.9%</td>
+                    </tr>
+                    
+                    <tr>
+                      <td>hypersundays</td>
+                      <td class="num">44</td>
+                      <td class="num">2</td>
+                      <td class="num">4.5%</td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>

@@ -22,6 +22,11 @@
         font-size: clamp(1.5rem, 4vw, 2rem);
       }
       h2 { margin: 0 0 8px; font-size: clamp(1.1rem, 3vw, 1.4rem); }
+      h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        color: #111827;
+      }
       p { margin: 0 0 12px; color: #4b5563; }
       .card {
         border: 1px solid #e5e7eb;
@@ -30,7 +35,26 @@
         background: #fff;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
       }
-      .stack { display: grid; gap: 12px; }
+      .main-grid {
+        display: grid;
+        gap: 12px;
+        align-items: start;
+      }
+      .leaderboard-card {
+        justify-self: start;
+        width: fit-content;
+        max-width: 100%;
+      }
+      .games-stack {
+        display: grid;
+        gap: 12px;
+      }
+      .game-section {
+        border: 1px solid #f0f1f4;
+        border-radius: 10px;
+        padding: 10px;
+        background: #fcfcfd;
+      }
       .table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -48,11 +72,66 @@
         white-space: nowrap;
       }
       th { background: #f9fafb; }
+      .num { text-align: right; }
+      tbody tr:nth-child(even) { background: #fafafa; }
+      .per-game-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
 
-      @media (max-width: 640px) {
+      @media (min-width: 1000px) {
+        .main-grid {
+          grid-template-columns: minmax(320px, max-content) 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
         .container { padding: 12px; }
         .card { padding: 12px; border-radius: 10px; }
         th, td { font-size: 0.9rem; padding: 7px 8px; }
+        .main-grid { grid-template-columns: 1fr; }
+        .leaderboard-card { width: 100%; }
+
+        .leaderboard-table {
+          width: 100%;
+          min-width: 0;
+        }
+        .leaderboard-table thead {
+          display: none;
+        }
+        .leaderboard-table tbody,
+        .leaderboard-table tr,
+        .leaderboard-table td {
+          display: block;
+          width: 100%;
+        }
+        .leaderboard-table tbody tr {
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
+          margin-bottom: 8px;
+          padding: 8px 10px;
+          background: #fff;
+        }
+        .leaderboard-table tbody tr:nth-child(even) {
+          background: #fff;
+        }
+        .leaderboard-table td {
+          border: 0;
+          padding: 4px 0;
+          white-space: normal;
+          text-align: left;
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 10px;
+        }
+        .leaderboard-table td::before {
+          content: attr(data-label);
+          font-weight: 600;
+          color: #4b5563;
+          flex-shrink: 0;
+        }
       }
     </style>
   </head>
@@ -60,27 +139,27 @@
     <div class="container">
       <h1>Board Game Leaderboard</h1>
 
-      <div class="stack">
-        <div class="card">
+      <div class="main-grid">
+        <div class="card leaderboard-card">
           <h2>Leaderboard</h2>
           <p>Ranked by overall win share (wins / games played).</p>
           <div class="table-wrap">
-            <table>
+            <table class="leaderboard-table">
               <thead>
                 <tr>
                   <th>Player</th>
-                  <th>Games</th>
-                  <th>Wins</th>
-                  <th>Win Rate</th>
+                  <th class="num">Games</th>
+                  <th class="num">Wins</th>
+                  <th class="num">Win Rate</th>
                 </tr>
               </thead>
               <tbody>
                 {% for row in leaderboard %}
                 <tr>
-                  <td>{{ row['name'] }}</td>
-                  <td>{{ row['games_played'] }}</td>
-                  <td>{{ row['wins'] }}</td>
-                  <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+                  <td data-label="Player">{{ row['name'] }}</td>
+                  <td class="num" data-label="Games">{{ row['games_played'] }}</td>
+                  <td class="num" data-label="Wins">{{ row['wins'] }}</td>
+                  <td class="num" data-label="Win Rate">{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
                 </tr>
                 {% else %}
                 <tr><td colspan="4">No confirmed game results yet.</td></tr>
@@ -92,31 +171,36 @@
 
         <div class="card">
           <h2>Per-game win rate</h2>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Player</th>
-                  <th>Games</th>
-                  <th>Wins</th>
-                  <th>Win Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in per_game %}
-                <tr>
-                  <td>{{ row['game_name'] }}</td>
-                  <td>{{ row['player_name'] }}</td>
-                  <td>{{ row['games_played'] }}</td>
-                  <td>{{ row['wins'] }}</td>
-                  <td>{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="5">No per-game results yet.</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
+          <div class="games-stack">
+            {% for group in per_game_groups %}
+            <div class="game-section">
+              <h3>{{ group['game_name']|title }}</h3>
+              <div class="table-wrap">
+                <table class="per-game-table">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th class="num">Games</th>
+                      <th class="num">Wins</th>
+                      <th class="num">Win Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in group['rows'] %}
+                    <tr>
+                      <td>{{ row['player_name'] }}</td>
+                      <td class="num">{{ row['games_played'] }}</td>
+                      <td class="num">{{ row['wins'] }}</td>
+                      <td class="num">{{ '%.1f%%'|format(row['win_rate'] * 100) }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {% else %}
+            <p>No per-game results yet.</p>
+            {% endfor %}
           </div>
         </div>
       </div>
